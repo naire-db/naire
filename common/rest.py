@@ -3,9 +3,11 @@ import json
 
 from django.core.exceptions import BadRequest
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 
 def acquire_json(view):
+    @require_POST
     @functools.wraps(view)
     def wrapper(request):
         try:

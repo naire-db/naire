@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.views.decorators.http import require_safe, require_POST
+from django.views.decorators.http import require_safe
 from django.contrib import auth
 
 from common.rest import rest_ok, rest_fail, acquire_json
@@ -14,7 +14,6 @@ def hello(request):
     return HttpResponse('Hello, world!')
 
 
-@require_POST
 @acquire_json
 def login(request, data):
     username = str(data['username'])
