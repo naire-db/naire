@@ -22,7 +22,7 @@ def acquire_json(view):
     return wrapper
 
 
-def rest_msg(msg: str, code=0, **kw):
+def rest_msg(msg: str, code: int = 0, **kw):
     return JsonResponse({
         'code': code,
         'message': msg,
@@ -30,9 +30,17 @@ def rest_msg(msg: str, code=0, **kw):
     })
 
 
-def rest_code(code, **kw):
+def rest(code: int, **kw):
     return JsonResponse({
         'code': code,
+        **kw
+    })
+
+
+def rest_data(data: dict, code: int = 0, **kw):
+    return JsonResponse({
+        'code': code,
+        'data': data,
         **kw
     })
 

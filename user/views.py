@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_safe
 from django.contrib import auth
 
-from common.rest import rest_ok, rest_fail, acquire_json
+from common.rest import rest_ok, rest_fail, acquire_json, rest_data
 from common.log import logger
 
 
@@ -16,13 +16,17 @@ def hello(request):
 
 @acquire_json
 def login(request, data):
-    username = str(data['username'])
+    username = str(data['username_or_email'])  # TODO: handle emails
     password = str(data['password'])
     user = auth.authenticate(request, username=username, password=password)
     if user is not None:
         auth.login(request, user)
         logger.info(f'{request.session} logged in as {user}')
-        return rest_ok()
+        return rest_data({
+            'username': user.username,
+            'email': user.email,
+            'dname': user.dname
+        })
     return rest_fail()
 
 
