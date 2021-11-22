@@ -10,7 +10,3 @@ FLUSH PRIVILEGES;
 ```
 
 生产环境中应更改数据库用户的密码，编辑 `prod.env` 并在运行服务端时加载。
-
-## Guidelines 
-
-修改模型后，应使用 `python manage.py makemigrations` 更新 migrations 并 commit。
