@@ -1,3 +1,7 @@
+## Contributing
+
+如同 https://github.com/naire-db/naire-app#Contributing
+
 ## MariaDB / MySQL 初始化
 
 ```sql
