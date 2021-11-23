@@ -14,6 +14,13 @@ def hello(request):
     return HttpResponse('Hello, world!')
 
 
+@require_safe
+def info(request):
+    if request.user.is_authenticated:
+        return rest_data(request.user.info())
+    return rest_fail()
+
+
 @acquire_json
 def login(request, data):
     username = str(data['username_or_email'])  # TODO: handle emails
@@ -22,11 +29,7 @@ def login(request, data):
     if user is not None:
         auth.login(request, user)
         logger.info(f'{request.session} logged in as {user}')
-        return rest_data({
-            'username': user.username,
-            'email': user.email,
-            'dname': user.dname
-        })
+        return rest_data(user.info())
     return rest_fail()
 
 
