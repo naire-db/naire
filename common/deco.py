@@ -1,6 +1,7 @@
 import functools
 
 from .rest import rest_msg
+from .errors import ERR_AUTH_REQUIRED
 
 
 def check_logged_in(view):
@@ -8,6 +9,6 @@ def check_logged_in(view):
     def wrapper(request):
         if request.user.is_authenticated:
             return view(request)
-        return rest_msg('login required', code=2)
+        return rest_msg('login required', code=ERR_AUTH_REQUIRED)
 
     return wrapper

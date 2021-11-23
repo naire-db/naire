@@ -5,6 +5,8 @@ from django.core.exceptions import BadRequest
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
+from common.errors import ERR_FAILURE
+
 
 def acquire_json(view):
     @require_POST
@@ -53,5 +55,5 @@ def rest_ok():
 
 def rest_fail():
     return JsonResponse({
-        'code': 1
+        'code': ERR_FAILURE
     })
