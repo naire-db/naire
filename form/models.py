@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 class Form(models.Model):
-    name = models.CharField(max_length=200)
+    title = models.CharField(max_length=200)
     ctime = models.DateTimeField(auto_now_add=True)
     body = models.JSONField()
     owner_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
@@ -11,7 +11,7 @@ class Form(models.Model):
     def info(self):
         return {
             'id': self.id,
-            'name': self.name,
+            'title': self.title,
             'ctime': self.ctime.timestamp()
         }
 
