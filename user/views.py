@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.core.exceptions import BadRequest
-from django.views.decorators.http import require_safe
+from django.views.decorators.http import require_safe, require_POST
 from django.contrib import auth
 
 from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
@@ -25,6 +25,7 @@ def info(request):
     return rest_fail()
 
 
+@require_POST
 @acquire_json
 def login(request, data):
     username = str(data['username_or_email'])  # TODO: handle emails
@@ -43,6 +44,7 @@ def logout(request):
     return rest_ok()
 
 
+@require_POST
 @acquire_json
 def register(request, data):
     username = str(data['username'])
