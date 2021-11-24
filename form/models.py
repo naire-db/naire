@@ -8,6 +8,13 @@ class Form(models.Model):
     body = models.JSONField()
     owner_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
 
+    def info(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'ctime': self.ctime.timestamp()
+        }
+
 
 class Response(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE)

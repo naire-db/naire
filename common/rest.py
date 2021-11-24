@@ -39,7 +39,7 @@ def rest(code: int, **kw):
     })
 
 
-def rest_data(data: dict, code: int = 0, **kw):
+def rest_data(data, code: int = 0, **kw):
     return JsonResponse({
         'code': code,
         'data': data,
