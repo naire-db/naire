@@ -140,4 +140,4 @@ cython_debug/
 
 .idea
 .vscode
-migrations/*
+*/migrations/*
