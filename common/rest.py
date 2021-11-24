@@ -18,7 +18,7 @@ def acquire_json(view):
             raise BadRequest
         try:
             return view(request, data)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, KeyError):
             raise BadRequest
 
     return wrapper

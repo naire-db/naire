@@ -1,12 +1,12 @@
-from django.http import HttpResponse
-from django.core.exceptions import BadRequest
-from django.views.decorators.http import require_safe, require_POST
 from django.contrib import auth
+from django.core.exceptions import BadRequest
+from django.http import HttpResponse
+from django.views.decorators.http import require_safe, require_POST
 
-from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
 from common.errors import ERR_DUPL_USERNAME, ERR_DUPL_EMAIL
 from common.log import logger
-
+from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
+from common.types import ensure_str
 from .models import User
 
 
@@ -28,8 +28,8 @@ def info(request):
 @require_POST
 @acquire_json
 def login(request, data):
-    username = str(data['username_or_email'])  # TODO: handle emails
-    password = str(data['password'])
+    username = ensure_str(data['username_or_email'])  # TODO: handle emails
+    password = ensure_str(data['password'])
     user = auth.authenticate(request, username=username, password=password)
     if user is None:
         return rest_fail()
@@ -47,10 +47,10 @@ def logout(request):
 @require_POST
 @acquire_json
 def register(request, data):
-    username = str(data['username'])
-    email = str(data['email']).lower()
-    password = str(data['password'])
-    dname = str(data['dname'])
+    username = ensure_str(data['username'])
+    email = ensure_str(data['email']).lower()
+    password = ensure_str(data['password'])
+    dname = ensure_str(data['dname'])
     try:
         User.objects.get(username=username)
     except User.DoesNotExist:
