@@ -49,17 +49,9 @@ def register(request, data):
     email = ensure_str(data['email']).lower()
     password = ensure_str(data['password'])
     dname = ensure_str(data['dname'])
-    try:
-        User.objects.get(username=username)
-    except User.DoesNotExist:
-        pass
-    else:
+    if User.objects.filter(username=username).exists():
         return rest(ERR_DUPL_USERNAME)
-    try:
-        User.objects.get(email=email)
-    except User.DoesNotExist:
-        pass
-    else:
+    if User.objects.filter(email=email).exists():
         return rest(ERR_DUPL_EMAIL)
     try:
         user = User.objects.create_user(username=username, password=password, email=email, dname=dname)
