@@ -99,10 +99,9 @@ def save_profile(request, data):
 @acquire_json
 def change_password(request, data):
     old_password = request.user['password']
-    password = ensure_str(data['password'])
     new_password = ensure_str(data['new_password'])
-    if old_password != password:
-        return rest_fail()
-    request.user['password'] = password
-    return rest_data(request.user.info())
+    if request.user.check_password(old_password):
+        request.user['password'] = new_password
+        return rest_data(request.user.info())
+    return rest_fail()
 
