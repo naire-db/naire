@@ -26,7 +26,6 @@ def info(request):
     return rest_fail()
 
 
-@require_POST
 @acquire_json
 def login(request, data):
     username = ensure_str(data['username_or_email'])  # TODO: handle emails
@@ -45,7 +44,6 @@ def logout(request):
     return rest_ok()
 
 
-@require_POST
 @acquire_json
 def register(request, data):
     username = ensure_str(data['username'])
