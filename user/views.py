@@ -78,6 +78,7 @@ def save_profile(request, data):
     user.save()
     return rest_data(user.info())
 
+    return rest_data(request.user.info())
 
 @check_logged_in
 @acquire_json
