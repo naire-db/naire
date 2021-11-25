@@ -15,7 +15,6 @@ def get_all(request):
     return rest_data([dict(f.info(), resp_count=f.response_set.count()) for f in forms])
 
 
-@require_POST
 @check_logged_in
 @acquire_json
 def create(request, data):
