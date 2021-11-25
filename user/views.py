@@ -2,6 +2,10 @@ from django.contrib import auth
 from django.core.exceptions import BadRequest
 from django.http import HttpResponse
 from django.views.decorators.http import require_safe, require_POST
+<<<<<<< HEAD
+=======
+from common.deco import check_logged_in
+>>>>>>> 98e727c (user: save_profile: impl)
 
 from common.deco import check_logged_in
 from common.errors import ERR_DUPL_USERNAME, ERR_DUPL_EMAIL
@@ -70,17 +74,20 @@ def register(request, data):
 def save_profile(request, data):
     email = ensure_str(data['email'])
     dname = ensure_str(data['dname']) # display name
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        request.user.email = email
+    if email == request.user.email:
         request.user.dname = dname
         request.user.save()
     else:
-        if user != request.user:
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            request.user.email = email
+            request.user.dname = dname
+            request.user.save()
+        else:
             return rest(ERR_DUPL_EMAIL)
-    return rest_data(request.user.info())
 
+    return rest_data(request.user.info())
 
 @require_POST
 @check_logged_in
