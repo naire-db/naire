@@ -93,3 +93,16 @@ def save_profile(request, data):
     request.user['dname'] = dname
     return rest_data(request.user.info())
 
+
+@require_POST
+@check_logged_in
+@acquire_json
+def change_password(request, data):
+    old_password = request.user['password']
+    password = ensure_str(data['password'])
+    new_password = ensure_str(data['new_password'])
+    if old_password != password:
+        return rest_fail()
+    request.user['password'] = password
+    return rest_data(request.user.info())
+
