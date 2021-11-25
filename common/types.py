@@ -1,3 +1,9 @@
+def ensure_int(o) -> int:
+    if not isinstance(o, int):
+        raise TypeError
+    return o
+
+
 def ensure_str(o) -> str:
     if not isinstance(o, str):
         raise TypeError

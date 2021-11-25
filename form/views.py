@@ -1,10 +1,11 @@
 from django.core.exceptions import BadRequest
-from django.views.decorators.http import require_safe, require_POST
+from django.views.decorators.http import require_safe
 
 from common.deco import check_logged_in
 from common.log import logger
-from common.rest import rest_data, acquire_json, rest_ok
-from common.types import ensure_str, ensure_dict
+from common.rest import rest_data, acquire_json, rest_ok, rest_fail
+from common.types import ensure_str, ensure_dict, ensure_int
+
 from .models import Form
 
 
@@ -28,3 +29,14 @@ def create(request, data):
         logger.warning(f'form.create: Bad request caused {type(e).__name__} {e}')
         raise BadRequest
     return rest_ok()
+
+
+@acquire_json
+def get_detail(request, data):
+    fid = ensure_int(data['fid'])
+    try:
+        # TODO: Check (future) permissions.
+        #  Maybe we shouldn't distinguish this from nonexistence in response code for security?
+        return rest_data(Form.objects.get(id=fid).detail())
+    except Form.DoesNotExist:
+        return rest_fail()

@@ -15,6 +15,12 @@ class Form(models.Model):
             'ctime': self.ctime.timestamp()
         }
 
+    def detail(self):
+        return {
+            'title': self.title,
+            'body': self.body
+        }
+
 
 class Response(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE)
