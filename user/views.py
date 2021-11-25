@@ -89,8 +89,9 @@ def save_profile(request, data):
             pass
         else:
             return rest(ERR_DUPL_EMAIL)
-    request.user['email'] = email
-    request.user['dname'] = dname
+    request.user.email = email
+    request.user.dname = dname
+    request.user.save()
     return rest_data(request.user.info())
 
 
@@ -98,10 +99,12 @@ def save_profile(request, data):
 @check_logged_in
 @acquire_json
 def change_password(request, data):
-    old_password = request.user['password']
+    user_password = request.user.password
+    password = data['password']
     new_password = ensure_str(data['new_password'])
-    if request.user.check_password(old_password):
-        request.user['password'] = new_password
-        return rest_data(request.user.info())
+    if request.user.check_password(user_password):
+        request.user.set_password(new_password)
+        request.user.save()
+        return rest_ok()
     return rest_fail()
 
