@@ -35,8 +35,11 @@ def create(request, data):
 def get_detail(request, data):
     fid = ensure_int(data['fid'])
     try:
-        # TODO: Check (future) permissions.
-        #  Maybe we shouldn't distinguish this from nonexistence in response code for security?
-        return rest_data(Form.objects.get(id=fid).detail())
+        form = Form.objects.get(id=fid)
     except Form.DoesNotExist:
         return rest_fail()
+
+    # TODO: Check (future) permissions.
+    #  Maybe we shouldn't distinguish permission denying from nonexistence in the result code for security?
+
+    return rest_data(form.detail())
