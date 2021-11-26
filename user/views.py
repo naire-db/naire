@@ -32,7 +32,9 @@ def login(request, data):
     password = ensure_str(data['password'])
     user = auth.authenticate(request, username=username, password=password)
     if user is None:
-        return rest_fail()
+        user = User.objects.get(email=username)
+        if not user.check_password(password):
+            return rest_fail()
     auth.login(request, user)
     logger.info(f'Logged: {user}')
     return rest_data(user.info())
