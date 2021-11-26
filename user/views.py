@@ -82,7 +82,7 @@ def save_profile(request, data):
 @check_logged_in
 @acquire_json
 def change_password(request, data):
-    password = data['password']
+    password = ensure_str(data['password'])
     new_password = ensure_str(data['new_password'])
     if request.user.check_password(password):
         request.user.set_password(new_password)
