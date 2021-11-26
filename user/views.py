@@ -73,15 +73,12 @@ def save_profile(request, data):
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        pass
+        request.user.email = email
+        request.user.dname = dname
+        request.user.save()
     else:
-        if user == request.user:
-            pass
-        else:
+        if user != request.user:
             return rest(ERR_DUPL_EMAIL)
-    request.user.email = email
-    request.user.dname = dname
-    request.user.save()
     return rest_data(request.user.info())
 
 
