@@ -70,10 +70,9 @@ def save_profile(request, data):
     email = ensure_str(data['email'])
     dname = ensure_str(data['dname']) # display name
     if email != request.user.email:
-        if not User.objects.filter(email=email).exists():
-            request.user.email = email
-        else:
+        if User.objects.filter(email=email).exists():
             return rest(ERR_DUPL_EMAIL)
+        request.user.email = email
     request.user.dname = dname
     request.user.save()
     return rest_data(request.user.info())
