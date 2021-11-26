@@ -2,10 +2,6 @@ from django.contrib import auth
 from django.core.exceptions import BadRequest
 from django.http import HttpResponse
 from django.views.decorators.http import require_safe, require_POST
-<<<<<<< HEAD
-=======
-from common.deco import check_logged_in
->>>>>>> 98e727c (user: save_profile: impl)
 
 from common.deco import check_logged_in
 from common.errors import ERR_DUPL_USERNAME, ERR_DUPL_EMAIL
