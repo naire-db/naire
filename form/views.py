@@ -6,7 +6,7 @@ from common.log import logger
 from common.rest import rest_data, acquire_json, rest_ok, rest_fail
 from common.types import ensure_str, ensure_dict, ensure_int
 
-from .models import Form
+from .models import Form, Response
 
 
 @require_safe
@@ -43,3 +43,20 @@ def get_detail(request, data):
     #  Maybe we shouldn't distinguish permission denying from nonexistence in the result code for security?
 
     return rest_data(form.detail())
+
+
+@acquire_json
+def save_resp(request, data):
+    fid = ensure_int(data['fid'])
+    resp_body = ensure_dict(data['resp_body'])
+    try:
+        form = Form.objects.get(id=fid)
+    except Form.DoesNotExist:
+        return rest_fail()
+    if request.user:
+        resp = Response(form=form, body=resp_body, user=request.user)
+    else:
+        resp = Response(form=form, body=resp_body)
+    resp.save()
+    return rest_ok()
+
