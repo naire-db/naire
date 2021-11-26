@@ -67,9 +67,9 @@ def register(request, data):
 @check_logged_in
 @acquire_json
 def save_profile(request, data):
-    user = request.user
     email = ensure_str(data['email'])
-    dname = ensure_str(data['dname']) # display name
+    dname = ensure_str(data['dname'])  # display name
+    user = request.user
     if email != user.email:
         if User.objects.filter(email=email).exists():
             return rest(ERR_DUPL_EMAIL)
@@ -84,9 +84,9 @@ def save_profile(request, data):
 def change_password(request, data):
     password = ensure_str(data['password'])
     new_password = ensure_str(data['new_password'])
-    if request.user.check_password(password):
-        request.user.set_password(new_password)
-        request.user.save()
+    user = request.user
+    if user.check_password(password):
+        user.set_password(new_password)
+        user.save()
         return rest_ok()
     return rest_fail()
-
