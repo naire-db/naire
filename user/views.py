@@ -67,15 +67,16 @@ def register(request, data):
 @check_logged_in
 @acquire_json
 def save_profile(request, data):
+    user = request.user
     email = ensure_str(data['email'])
     dname = ensure_str(data['dname']) # display name
-    if email != request.user.email:
+    if email != user.email:
         if User.objects.filter(email=email).exists():
             return rest(ERR_DUPL_EMAIL)
-        request.user.email = email
-    request.user.dname = dname
-    request.user.save()
-    return rest_data(request.user.info())
+        user.email = email
+    user.dname = dname
+    user.save()
+    return rest_data(user.info())
 
 
 @check_logged_in
