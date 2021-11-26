@@ -28,12 +28,19 @@ def info(request):
 
 @acquire_json
 def login(request, data):
-    username = ensure_str(data['username_or_email'])  # TODO: handle emails
+    username = ensure_str(data['username_or_email'])
     password = ensure_str(data['password'])
-    user = auth.authenticate(request, username=username, password=password)
-    if user is None:
-        user = User.objects.get(email=username)
-        if not user.check_password(password):
+    if '@' in username:
+        try:
+            user = User.objects.get(email=username)
+        except User.DoesNotExist:
+            return rest_fail()
+        else:
+            if not user.check_password(password):
+                return rest_fail()
+    else:
+        user = auth.authenticate(request, username=username, password=password)
+        if user is None:
             return rest_fail()
     auth.login(request, user)
     logger.info(f'Logged: {user}')
