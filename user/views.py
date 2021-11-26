@@ -2,8 +2,8 @@ from django.contrib import auth
 from django.core.exceptions import BadRequest
 from django.http import HttpResponse
 from django.views.decorators.http import require_safe, require_POST
-from common.deco import check_logged_in
 
+from common.deco import check_logged_in
 from common.errors import ERR_DUPL_USERNAME, ERR_DUPL_EMAIL
 from common.log import logger
 from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
