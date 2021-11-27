@@ -60,3 +60,17 @@ def save_resp(request, data):
     resp.save()
     return rest_ok()
 
+
+@acquire_json
+def save_title(request, data):
+    fid = ensure_int(data['fid'])
+    title = ensure_str(data['title'])
+    try:
+        form = Form.objects.get(id=fid)
+    except Form.DoesNotExist:
+        return rest_fail()
+    form.title = title
+    form.save()
+    return rest_ok()
+
+

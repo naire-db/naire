@@ -7,4 +7,5 @@ urlpatterns = [
     path('create/', views.create, name='create'),
     path('get_detail/', views.get_detail, name='get_detail'),
     path('save_resp/', views.save_resp, name='save_resp'),
+    path('save_title/', views.save_title, name='save_title'),
 ]
