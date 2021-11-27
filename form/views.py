@@ -10,11 +10,10 @@ from common.types import ensure_str, ensure_dict, ensure_int
 from .models import Form, Response
 
 
-def is_form_owner(request, form):
-    # TODO: form owner maybe is org
-    if request.user != form.owner_user:
+def ensure_modifiable(user, form):
+    # TODO: form owner 有可能是 Org
+    if user != form.owner_user:
         raise PermissionDenied
-    return True
 
 
 @require_safe
@@ -66,7 +65,7 @@ def save_title(request, data):
     title = ensure_str(data['title'])
     form = get_object_or_404(Form, id=fid)
     form.title = title
-    is_form_owner(request, form)
+    ensure_modifiable(request.user, form)
     save_or_400(form)
     return rest_ok()
 
@@ -79,7 +78,7 @@ def change_body(request, data):
     form = get_object_or_404(Form, id=fid)
     form.response_set.all().delete()
     form.body = body
-    is_form_owner(request, form)
+    ensure_modifiable(request.user, form)
     form.save()
     return rest_ok()
 
@@ -89,7 +88,7 @@ def change_body(request, data):
 def remove(request, data):
     fid = ensure_int(data['fid'])
     form = get_object_or_404(Form, id=fid)
-    is_form_owner(request, form)
+    ensure_modifiable(request.user, form)
     form.delete()
     return rest_ok()
 
