@@ -82,8 +82,7 @@ def change_body(request, data):
         form = Form.objects.get(id=fid)
     except Form.DoesNotExist:
         return rest_fail()
-    else:
-        resp = Response.objects.filter(form=form).delete()
+    Response.objects.filter(form=form).delete()
     form.body = body
     form.save()
     return rest_ok()
