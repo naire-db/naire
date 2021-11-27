@@ -74,3 +74,15 @@ def save_title(request, data):
     return rest_ok()
 
 
+@acquire_json
+def change_body(request, data):
+    fid = ensure_int(data['fid'])
+    body = ensure_dict(data['body'])
+    try:
+        form = Form.objects.get(id=fid)
+    except Form.DoesNotExist:
+        return rest_fail()
+    form.body = body
+    form.save()
+    return rest_ok()
+
