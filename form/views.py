@@ -1,4 +1,5 @@
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_safe
 
@@ -92,3 +93,54 @@ def remove(request, data):
     form.delete()
     return rest_ok()
 
+
+@check_logged_in
+@acquire_json
+def get_form_resps(request, data):
+    fid = ensure_int(data['fid'])
+    form = get_object_or_404(Form, id=fid)
+    ensure_modifiable(request.user, form)
+    return rest_data({
+        'form': form.detail(),
+        'resps': [r.info() for r in form.response_set.all()]
+    })
+
+
+@check_logged_in
+@acquire_json
+def get_form_stats(request, data):
+    fid = ensure_int(data['fid'])
+    form = get_object_or_404(Form, id=fid)
+    ensure_modifiable(request.user, form)
+    return rest_data({
+        'form': form.detail(),
+        'resps': [r.detail() for r in form.response_set.all()]
+    })
+
+
+def get_modifiable_resp(request, rid, fid):
+    resp = get_object_or_404(Response, id=rid)
+    form = resp.form
+    if form.id != fid:
+        raise Http404  # TODO: can be exploited
+    ensure_modifiable(request.user, form)
+    return resp, form
+
+
+@check_logged_in
+@acquire_json
+def get_resp_detail(request, data):
+    fid = ensure_int(data['fid'])
+    rid = ensure_int(data['rid'])
+    resp, _ = get_modifiable_resp(request, rid, fid)
+    return rest_data(resp.detail())
+
+
+@check_logged_in
+@acquire_json
+def remove_resp(request, data):
+    fid = ensure_int(data['fid'])
+    rid = ensure_int(data['rid'])
+    resp, _ = get_modifiable_resp(request, rid, fid)
+    resp.delete()
+    return rest_ok()

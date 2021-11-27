@@ -8,14 +8,14 @@ class Form(models.Model):
     body = models.JSONField()
     owner_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
 
-    def info(self):
+    def info(self) -> dict[str]:
         return {
             'id': self.id,
             'title': self.title,
             'ctime': self.ctime.timestamp()
         }
 
-    def detail(self):
+    def detail(self) -> dict[str]:
         return {
             'title': self.title,
             'body': self.body
@@ -26,3 +26,17 @@ class Response(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     body = models.JSONField()
+    ctime = models.DateTimeField(auto_now_add=True)
+
+    def info(self) -> dict[str]:
+        return {
+            'id': self.id,
+            'user': None if self.user is None else self.user.description(),
+            'ctime': self.ctime.timestamp()
+        }
+
+    def detail(self) -> dict[str]:
+        return {
+            'id': self.id,
+            'body': self.body
+        }

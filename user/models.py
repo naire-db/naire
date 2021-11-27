@@ -13,3 +13,9 @@ class User(AbstractUser):
             'email': self.email,
             'dname': self.dname
         }
+
+    def description(self) -> dict[str]:
+        return {
+            'username': self.username,
+            'dname': self.dname
+        }
