@@ -53,10 +53,10 @@ def save_resp(request, data):
         form = Form.objects.get(id=fid)
     except Form.DoesNotExist:
         return rest_fail()
-    if request.user:
-        resp = Response(form=form, body=resp_body, user=request.user)
-    else:
+    if request.user.is_anonymous:
         resp = Response(form=form, body=resp_body)
+    else:
+        resp = Response(form=form, body=resp_body, user=request.user)
     resp.save()
     return rest_ok()
 
