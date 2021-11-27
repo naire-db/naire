@@ -1,10 +1,9 @@
-from django.core.exceptions import BadRequest
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_safe
 
 from common.deco import check_logged_in
-from common.log import logger
+from common.models import save_or_400, get_user
 from common.rest import rest_data, acquire_json, rest_ok, rest_fail
 from common.types import ensure_str, ensure_dict, ensure_int
 
@@ -24,12 +23,7 @@ def create(request, data):
     title = ensure_str(data['title'])
     body = ensure_dict(data['body'])
     form = Form(title=title, body=body, owner_user=request.user)
-    try:
-        form.save()
-    except Exception as e:
-        # Abuser may provide a too long title
-        logger.warning(f'form.create: Bad request caused {type(e).__name__} {e}')
-        raise BadRequest
+    save_or_400(form)
     return rest_ok()
 
 
@@ -51,11 +45,9 @@ def get_detail(request, data):
 def save_resp(request, data):
     fid = ensure_int(data['fid'])
     resp_body = ensure_dict(data['resp_body'])
+    # TODO: After we implement Orgs, some member might delete a Form which another is editing.
     form = get_object_or_404(Form, id=fid)
-    if request.user.is_anonymous:
-        resp = Response(form=form, body=resp_body)
-    else:
-        resp = Response(form=form, body=resp_body, user=request.user)
+    resp = Response(form=form, body=resp_body, user=get_user(request))
     resp.save()
     return rest_ok()
 
@@ -67,12 +59,7 @@ def save_title(request, data):
     title = ensure_str(data['title'])
     form = get_object_or_404(Form, id=fid)
     form.title = title
-    try:
-        form.save()
-    except Exception as e:
-        # title too long
-        logger.warning(f'form.save_title: Bad request caused {type(e).__name__} {e}')
-        raise BadRequest
+    save_or_400(form)
     return rest_ok()
 
 
@@ -82,7 +69,7 @@ def change_body(request, data):
     fid = ensure_int(data['fid'])
     body = ensure_dict(data['body'])
     form = get_object_or_404(Form, id=fid)
-    # use entryset
+    # TODO: use entry_set
     Response.objects.filter(form=form).delete()
     form.body = body
     form.save()
@@ -95,7 +82,6 @@ def remove(request, data):
     fid = ensure_int(data['fid'])
     form = get_object_or_404(Form, id=fid)
     if request.user != form.owner_user:
-        return HttpResponseForbidden()  # response 403 Forbidden
+        return HttpResponseForbidden()
     form.delete()
     return rest_ok()
-
