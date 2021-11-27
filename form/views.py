@@ -89,6 +89,7 @@ def change_body(request, data):
 
 
 @acquire_json
+@check_logged_in
 def remove(request, data):
     fid = ensure_int(data['fid'])
     try:
