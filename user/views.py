@@ -35,9 +35,8 @@ def login(request, data):
             user = User.objects.get(email=username)
         except User.DoesNotExist:
             return rest_fail()
-        else:
-            if not user.check_password(password):
-                return rest_fail()
+        if not user.check_password(password):
+            return rest_fail()
     else:
         user = auth.authenticate(request, username=username, password=password)
         if user is None:
