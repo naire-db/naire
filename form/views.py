@@ -1,4 +1,4 @@
-from django.http import HttpResponseForbidden
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_safe
 
@@ -8,6 +8,13 @@ from common.rest import rest_data, acquire_json, rest_ok, rest_fail
 from common.types import ensure_str, ensure_dict, ensure_int
 
 from .models import Form, Response
+
+
+def is_form_owner(request, form):
+    # TODO: form owner maybe is org
+    if request.user != form.owner_user:
+        raise PermissionDenied
+    return True
 
 
 @require_safe
@@ -59,6 +66,7 @@ def save_title(request, data):
     title = ensure_str(data['title'])
     form = get_object_or_404(Form, id=fid)
     form.title = title
+    is_form_owner(request, form)
     save_or_400(form)
     return rest_ok()
 
@@ -69,9 +77,9 @@ def change_body(request, data):
     fid = ensure_int(data['fid'])
     body = ensure_dict(data['body'])
     form = get_object_or_404(Form, id=fid)
-    # TODO: use entry_set
-    Response.objects.filter(form=form).delete()
+    form.response_set.all().delete()
     form.body = body
+    is_form_owner(request, form)
     form.save()
     return rest_ok()
 
@@ -81,7 +89,7 @@ def change_body(request, data):
 def remove(request, data):
     fid = ensure_int(data['fid'])
     form = get_object_or_404(Form, id=fid)
-    if request.user != form.owner_user:
-        return HttpResponseForbidden()
+    is_form_owner(request, form)
     form.delete()
     return rest_ok()
+
