@@ -1,4 +1,6 @@
 from django.core.exceptions import BadRequest
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_safe
 
 from common.deco import check_logged_in
@@ -49,10 +51,7 @@ def get_detail(request, data):
 def save_resp(request, data):
     fid = ensure_int(data['fid'])
     resp_body = ensure_dict(data['resp_body'])
-    try:
-        form = Form.objects.get(id=fid)
-    except Form.DoesNotExist:
-        return rest_fail()
+    form = get_object_or_404(Form, id=fid)
     if request.user.is_anonymous:
         resp = Response(form=form, body=resp_body)
     else:
@@ -61,43 +60,42 @@ def save_resp(request, data):
     return rest_ok()
 
 
+@check_logged_in
 @acquire_json
 def save_title(request, data):
     fid = ensure_int(data['fid'])
     title = ensure_str(data['title'])
-    try:
-        form = Form.objects.get(id=fid)
-    except Form.DoesNotExist:
-        return rest_fail()
+    form = get_object_or_404(Form, id=fid)
     form.title = title
-    form.save()
+    try:
+        form.save()
+    except Exception as e:
+        # title too long
+        logger.warning(f'form.save_title: Bad request caused {type(e).__name__} {e}')
+        raise BadRequest
     return rest_ok()
 
 
+@check_logged_in
 @acquire_json
 def change_body(request, data):
     fid = ensure_int(data['fid'])
     body = ensure_dict(data['body'])
-    try:
-        form = Form.objects.get(id=fid)
-    except Form.DoesNotExist:
-        return rest_fail()
+    form = get_object_or_404(Form, id=fid)
+    # use entryset
     Response.objects.filter(form=form).delete()
     form.body = body
     form.save()
     return rest_ok()
 
 
-@acquire_json
 @check_logged_in
+@acquire_json
 def remove(request, data):
     fid = ensure_int(data['fid'])
-    try:
-        form = Form.objects.get(id=fid)
-    except Form.DoesNotExist:
-        return rest_fail()
+    form = get_object_or_404(Form, id=fid)
     if request.user != form.owner_user:
-        return rest_fail()
+        return HttpResponseForbidden()  # response 403 Forbidden
     form.delete()
     return rest_ok()
 
