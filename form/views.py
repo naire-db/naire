@@ -64,8 +64,8 @@ def save_title(request, data):
     fid = ensure_int(data['fid'])
     title = ensure_str(data['title'])
     form = get_object_or_404(Form, id=fid)
-    form.title = title
     ensure_modifiable(request.user, form)
+    form.title = title
     save_or_400(form)
     return rest_ok()
 
@@ -76,9 +76,9 @@ def change_body(request, data):
     fid = ensure_int(data['fid'])
     body = ensure_dict(data['body'])
     form = get_object_or_404(Form, id=fid)
+    ensure_modifiable(request.user, form)
     form.response_set.all().delete()
     form.body = body
-    ensure_modifiable(request.user, form)
     form.save()
     return rest_ok()
 
