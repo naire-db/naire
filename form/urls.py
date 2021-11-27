@@ -9,4 +9,5 @@ urlpatterns = [
     path('save_resp/', views.save_resp, name='save_resp'),
     path('save_title/', views.save_title, name='save_title'),
     path('change_body/', views.change_body, name='change_body'),
+    path('remove/', views.remove, name='remove'),
 ]

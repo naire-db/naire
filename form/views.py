@@ -87,3 +87,16 @@ def change_body(request, data):
     form.save()
     return rest_ok()
 
+
+@acquire_json
+def remove(request, data):
+    fid = ensure_int(data['fid'])
+    try:
+        form = Form.objects.get(id=fid)
+    except Form.DoesNotExist:
+        return rest_fail()
+    if request.user != form.owner_user:
+        return rest_fail()
+    form.delete()
+    return rest_ok()
+
