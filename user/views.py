@@ -28,16 +28,17 @@ def info(request):
 
 @acquire_json
 def login(request, data):
-    username = ensure_str(data['username_or_email'])
+    username_or_email = ensure_str(data['username_or_email'])
     password = ensure_str(data['password'])
-    if '@' in username:
+    if '@' in username_or_email:
         try:
-            user = User.objects.get(email=username)
+            user = User.objects.get(email=username_or_email)
         except User.DoesNotExist:
             return rest_fail()
         if not user.check_password(password):
             return rest_fail()
     else:
+        username = username_or_email  # is username
         user = auth.authenticate(request, username=username, password=password)
         if user is None:
             return rest_fail()
