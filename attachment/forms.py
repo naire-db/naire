@@ -1,6 +1,9 @@
 from django import forms
+from .models import Attachment
 
 
-class AttachmentForm(forms.Form):
-    name = forms.CharField(max_length=200)
-    file = forms.FileField(max_length=1000)
+class AttachmentForm(forms.ModelForm):
+    class Meta:
+        model = Attachment
+        fields = ('name', 'file')
+
