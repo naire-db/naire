@@ -5,11 +5,11 @@ from django.views.decorators.http import require_POST
 
 from attachment.forms import AttachmentForm
 from naire import settings
-from common.rest import rest_ok, rest_fail, rest_data
+from common.rest import rest_ok, rest_fail, rest_data, acquire_json
 
 
 @require_POST
-def upload(request):
+def upload_file(request):
     form = AttachmentForm(request.POST, request.FILES)
     if form.is_valid():
         try:
@@ -24,8 +24,8 @@ def upload(request):
     return rest_fail()
 
 
-@require_POST
-def download(request, path):
+@acquire_json
+def download_file(request, path):
     file_path = os.path.join(settings.MEDIA_ROOT, path)
     if os.path.exists(file_path):
         with open(file_path, 'rb'):
