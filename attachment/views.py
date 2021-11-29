@@ -1,26 +1,34 @@
-from django.core.files.storage import FileSystemStorage
+import os
+
+from django.http import Http404, HttpResponseForbidden
 from django.views.decorators.http import require_POST
 
 from attachment.forms import AttachmentForm
-from common.models import save_or_400
-from .models import Attachment
-from common.rest import rest_ok
+from naire import settings
+from common.rest import rest_ok, rest_fail, rest_data
 
 
 @require_POST
 def upload(request):
     form = AttachmentForm(request.POST, request.FILES)
     if form.is_valid():
-        file = request.FILES['file']
-        name = file.name
-        fs = FileSystemStorage()
-        path = fs.save(name, file)
-        # TODO: add resp_id
-        attachment = Attachment(file=file, name=name)
-        save_or_400(attachment)
-    return rest_ok()
+        try:
+            attachment = form.save()
+        except ValueError:
+            return HttpResponseForbidden()
+        print(attachment.file.url)
+        return rest_data(attachment.id)
+    if settings.DEBUG:
+        for field in form:
+            print('Field Error:', field.name, field.errors)
+    return rest_fail()
 
 
 @require_POST
-def download(request):
-    pass
+def download(request, path):
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+    if os.path.exists(file_path):
+        with open(file_path, 'rb'):
+            pass
+        # return rest_ok()
+    raise Http404
