@@ -1,11 +1,12 @@
-import os
-
-from django.http import Http404, HttpResponseForbidden
-from django.views.decorators.http import require_POST
+from django.http import HttpResponseForbidden, FileResponse
+from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST, require_safe
 
 from attachment.forms import AttachmentForm
+from attachment.models import Attachment
+from common.deco import check_logged_in
 from naire import settings
-from common.rest import rest_ok, rest_fail, rest_data, acquire_json
+from common.rest import rest_ok, rest_fail, rest_data
 
 
 @require_POST
@@ -24,11 +25,11 @@ def upload_file(request):
     return rest_fail()
 
 
-@acquire_json
-def download_file(request, path):
-    file_path = os.path.join(settings.MEDIA_ROOT, path)
-    if os.path.exists(file_path):
-        with open(file_path, 'rb'):
-            pass
-        # return rest_ok()
-    raise Http404
+@require_safe
+@check_logged_in
+def download_file(request, fid):
+    print('fid =', fid)
+    # TODO: check response's authority
+    attachment = get_object_or_404(Attachment, id=fid)
+    return FileResponse(open(attachment.file.path, 'rb'))
+
