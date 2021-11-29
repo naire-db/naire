@@ -28,7 +28,6 @@ def upload_file(request):
 @require_safe
 @check_logged_in
 def download_file(request, fid):
-    print('fid =', fid)
     # TODO: check response's authority
     attachment = get_object_or_404(Attachment, id=fid)
     return FileResponse(open(attachment.file.path, 'rb'))
