@@ -8,6 +8,8 @@ from common.errors import ERR_DUPL_USERNAME, ERR_DUPL_EMAIL
 from common.log import logger
 from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
 from common.types import ensure_str
+
+from form.models import Folder
 from .models import User
 
 
@@ -63,12 +65,21 @@ def register(request, data):
         return rest(ERR_DUPL_USERNAME)
     if User.objects.filter(email=email).exists():
         return rest(ERR_DUPL_EMAIL)
+    folder = Folder(name='未分类')
+    folder.save()
     try:
-        user = User.objects.create_user(username=username, password=password, email=email, dname=dname)
+        user = User.objects.create_user(
+            username=username, password=password,
+            email=email, dname=dname,
+            root_folder=folder
+        )
     except Exception as e:
         # Shouldn't be reached from our validating frontend
+        folder.delete()
         logger.warning(f'Bad request caused {type(e).__name__} {e}')
         raise BadRequest
+    folder.owner_user = user
+    folder.save()
     logger.info(f'Registered: {user}')
     return rest_data(user.info())
 
