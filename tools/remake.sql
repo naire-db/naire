@@ -1,0 +1,5 @@
+DROP DATABASE naire;
+CREATE DATABASE naire;
+
+GRANT ALL PRIVILEGES ON naire.* TO 'naire'@'localhost';
+FLUSH PRIVILEGES;
