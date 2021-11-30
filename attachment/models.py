@@ -1,3 +1,4 @@
+from django.core.validators import validate_image_file_extension
 from django.db import models
 
 from form.models import Response, Form
@@ -23,9 +24,13 @@ class Attachment(models.Model):
 
 
 class Image(models.Model):
-    image = models.ImageField(upload_to='images/', max_length=1000)
+    image = models.ImageField(
+        upload_to='images/',
+        max_length=1000,
+        validators=[validate_image_file_extension]
+    )
     name = models.CharField(max_length=200)
-    form = models.ForeignKey(Form, on_delete=models.CASCADE)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE, blank=True, null=True)
 
     def info(self) -> dict[str]:
         return {
