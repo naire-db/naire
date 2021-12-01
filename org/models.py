@@ -26,10 +26,15 @@ class Membership(models.Model):
         default=Role.MEMBER,
     )
 
-    def info(self) -> dict[str]:
+    def org_info(self) -> dict[str]:
         return {
             'id': self.org.id,
             'name': self.org.name,
             'member_count': self.org.members.count(),
             'role': self.role,
         }
+
+    def member_info(self) -> dict[str]:
+        res = self.user.info()
+        res['role'] = self.role
+        return res
