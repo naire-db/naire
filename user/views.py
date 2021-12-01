@@ -123,4 +123,4 @@ def create_org(request, data):
     save_or_400(org)
     membership = MemberShip(user=request.user, org=org, role=MemberShip.Role.OWNER)
     save_or_400(membership)
-    return rest_ok()
+    return rest_data(org.id)
