@@ -118,9 +118,9 @@ def change_password(request, data):
 def create_org(request, data):
     name = ensure_str(data['name'])
     folder = Folder(name='未分类')
-    save_or_400(folder)
+    folder.save()
     org = Org(name=name, root_folder=folder)
     save_or_400(org)
     membership = MemberShip(user=request.user, org=org, role=MemberShip.Role.OWNER)
-    save_or_400(membership)
+    membership.save()
     return rest_data(org.id)
