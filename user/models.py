@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 
 from naire import settings
@@ -25,8 +25,8 @@ class User(AbstractUser):
         }
 
 
-class Org(Group):
-    org_name = models.CharField(max_length=120)
+class Org(models.Model):
+    name = models.CharField(max_length=120)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Membership', related_name='members_of_org')
     root_folder = models.ForeignKey('form.Folder', on_delete=models.PROTECT)
     ctime = models.DateTimeField(auto_now_add=True)
@@ -34,15 +34,14 @@ class Org(Group):
 
 class MemberShip(models.Model):
     class Role(models.IntegerChoices):
-        OWNER = 0, _('owner')
+        MEMBER = 0, _('member')
         ADMIN = 1, _('admin')
-        MEMBER = 2, _('member')
+        OWNER = 2, _('owner')
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     org = models.ForeignKey(Org, on_delete=models.CASCADE)
-    date_joined = models.DateField(auto_now_add=True)
-    role = models.CharField(
-        max_length=6,
+    ctime = models.DateTimeField(auto_now_add=True)
+    role = models.IntegerField(
         choices=Role.choices,
         default=Role.MEMBER,
     )

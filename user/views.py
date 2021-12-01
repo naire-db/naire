@@ -6,6 +6,7 @@ from django.views.decorators.http import require_safe
 from common.deco import check_logged_in
 from common.errors import ERR_DUPL_USERNAME, ERR_DUPL_EMAIL
 from common.log import logger
+from common.models import save_or_400
 from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
 from common.types import ensure_str
 
@@ -114,11 +115,12 @@ def change_password(request, data):
 
 @check_logged_in
 @acquire_json
-def org_create(request, data):
-    org_name = ensure_str(data['org_name'])
+def create_org(request, data):
+    name = ensure_str(data['name'])
     folder = Folder(name='未分类')
-    owner = request.user
-    org = Org.objects.create(org_name=org_name, root_folder=folder)
-    membership = MemberShip(user=owner, org=org, role=0)
-    membership.save()
-
+    save_or_400(folder)
+    org = Org(name=name, root_folder=folder)
+    save_or_400(org)
+    membership = MemberShip(user=request.user, org=org, role=MemberShip.Role.OWNER)
+    save_or_400(membership)
+    return rest_ok()
