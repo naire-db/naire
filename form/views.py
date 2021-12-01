@@ -31,7 +31,7 @@ def get_overview(request):
     })
 
 
-def get_owned_folder(request, data):
+def get_owned_folder(request, data) -> Folder:
     folder_id = ensure_int(data['folder_id'])
     folder = get_object_or_404(Folder, id=folder_id)
     if folder.owner_user != request.user:
@@ -39,7 +39,7 @@ def get_owned_folder(request, data):
     return folder
 
 
-def get_owned_form(request, data):
+def get_owned_form(request, data) -> Form:
     form_id = ensure_int(data['fid'])
     form = get_object_or_404(Form, id=form_id)
     if form.folder.owner_user != request.user:
@@ -103,6 +103,19 @@ def move_to_folder(request, data):
     form.folder = folder
     form.save()
     return rest_ok()
+
+
+@check_logged_in
+@acquire_json
+def copy(request, data):
+    form = get_owned_form(request, data)
+    folder = get_owned_folder(request, data)
+    title = ensure_str(data['title'])
+    form.pk = None
+    form._state.adding = True
+    form.make_cloned(folder, title)
+    save_or_400(form)
+    return rest_data(form.info())
 
 
 @check_logged_in

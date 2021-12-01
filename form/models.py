@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils.timezone import now
 
 
 class Folder(models.Model):
@@ -33,6 +34,11 @@ class Form(models.Model):
             'title': self.title,
             'body': self.body
         }
+
+    def make_cloned(self, folder: Folder, title: str):
+        self.folder = folder
+        self.title = title
+        self.ctime = now()
 
 
 class Response(models.Model):
