@@ -9,8 +9,8 @@ class User(AbstractUser):
 
     def info(self) -> dict[str]:
         return {
+            'id': self.id,
             'username': self.username,
-            'uid': self.id,
             'email': self.email,
             'dname': self.dname
         }
