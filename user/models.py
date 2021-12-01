@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     dname = models.CharField(max_length=120)
-    root_folder = models.ForeignKey('form.Folder', on_delete=models.PROTECT)
+    root_folder = models.OneToOneField('form.Folder', on_delete=models.PROTECT)
 
     def info(self) -> dict[str]:
         return {
