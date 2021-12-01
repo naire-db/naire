@@ -46,5 +46,6 @@ def get_members(request, data):
     # TODO: include a share token
     return rest_data({
         'name': org.name,
-        'members': [m.member_info() for m in org.membership_set.all()]
+        'invite_token': org.invite_token,
+        'members': [m.member_info() for m in org.membership_set.all()],
     })
