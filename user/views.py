@@ -11,7 +11,7 @@ from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
 from common.types import ensure_str
 
 from form.models import Folder
-from .models import User, Org, MemberShip
+from .models import User, Org, Membership
 
 
 @require_safe
@@ -121,6 +121,6 @@ def create_org(request, data):
     folder.save()
     org = Org(name=name, root_folder=folder)
     save_or_400(org)
-    membership = MemberShip(user=request.user, org=org, role=MemberShip.Role.OWNER)
-    membership.save()
+    m = Membership(user=request.user, org=org, role=Membership.Role.OWNER)
+    m.save()
     return rest_data(org.id)

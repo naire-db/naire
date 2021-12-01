@@ -32,7 +32,7 @@ class Org(models.Model):
     ctime = models.DateTimeField(auto_now_add=True)
 
 
-class MemberShip(models.Model):
+class Membership(models.Model):
     class Role(models.IntegerChoices):
         MEMBER = 0, _('member')
         ADMIN = 1, _('admin')
