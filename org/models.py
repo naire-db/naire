@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from naire import settings
+from user.models import User
 
 
 class Org(models.Model):
@@ -24,3 +25,11 @@ class Membership(models.Model):
         choices=Role.choices,
         default=Role.MEMBER,
     )
+
+    def info(self) -> dict[str]:
+        return {
+            'id': self.org.id,
+            'name': self.org.name,
+            'member_count': self.org.members.count(),
+            'role': self.role,
+        }

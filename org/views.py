@@ -1,3 +1,5 @@
+from django.views.decorators.http import require_safe
+
 from common.deco import check_logged_in
 from common.models import save_or_400
 from common.rest import acquire_json, rest_data
@@ -5,6 +7,12 @@ from common.types import ensure_str
 
 from form.models import Folder
 from .models import Org, Membership
+
+
+@require_safe
+@check_logged_in
+def get_joined(request):
+    return rest_data([m.info() for m in request.user.membership_set.all()])
 
 
 @check_logged_in
