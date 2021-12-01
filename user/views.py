@@ -10,7 +10,7 @@ from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
 from common.types import ensure_str
 
 from form.models import Folder
-from .models import User
+from .models import User, Org, MemberShip
 
 
 @require_safe
@@ -110,3 +110,15 @@ def change_password(request, data):
         user.save()
         return rest_ok()
     return rest_fail()
+
+
+@check_logged_in
+@acquire_json
+def org_create(request, data):
+    org_name = ensure_str(data['org_name'])
+    folder = Folder(name='未分类')
+    owner = request.user
+    org = Org.objects.create(org_name=org_name, root_folder=folder)
+    membership = MemberShip(user=owner, org=org, role=0)
+    membership.save()
+

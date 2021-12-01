@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group
+from django.utils.translation import gettext_lazy as _
 
 from naire import settings
 
@@ -26,23 +27,22 @@ class User(AbstractUser):
 
 class Org(Group):
     org_name = models.CharField(max_length=120)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='admin_of_org')
-    admin = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='admins_of_org')
-    members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='members_of_org')
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Membership', related_name='members_of_org')
     root_folder = models.ForeignKey('form.Folder', on_delete=models.PROTECT)
     ctime = models.DateTimeField(auto_now_add=True)
 
-    def info(self) -> dict[str]:
-        return {
-            'oid': self.id,
-            'org_name': self.org_name,
-            'owner': self.owner,
-            'member_count': self.user_set.count(),
-        }
 
-    def description(self) -> dict[str]:
-        return {
-            'org_name': self.org_name,
-            'owner_name': self.owner.dname,
-            'member_count': self.user_set.count(),
-        }
+class MemberShip(models.Model):
+    class Role(models.IntegerChoices):
+        OWNER = 0, _('owner')
+        ADMIN = 1, _('admin')
+        MEMBER = 2, _('member')
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    org = models.ForeignKey(Org, on_delete=models.CASCADE)
+    date_joined = models.DateField(auto_now_add=True)
+    role = models.CharField(
+        max_length=6,
+        choices=Role.choices,
+        default=Role.MEMBER,
+    )
