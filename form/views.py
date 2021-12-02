@@ -240,7 +240,7 @@ def save_title(request, data):
 @acquire_json
 def get_status(request, data):
     form = get_owned_form(request, data)
-    return rest_data(form.status())
+    return rest_data(form.detail())
 
 
 @check_logged_in
