@@ -148,7 +148,6 @@ def copy(request, data):
 @check_logged_in
 @acquire_json
 def create(request, data):
-    # TODO: folder id
     title = ensure_str(data['title'])
     body = ensure_dict(data['body'])
     folder_id = data['folder_id']
