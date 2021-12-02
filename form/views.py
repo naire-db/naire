@@ -103,7 +103,11 @@ def create_folder(request, data):
 @acquire_json
 def remove_folder(request, data):
     folder = get_owned_folder(request, data)
-    folder.form_set.update(folder_id=request.user.root_folder_id)
+    # TODO: more optimized?
+    if folder.owner_user is None:
+        folder.form_set.update(folder_id=folder.owner_org.root_folder_id)
+    else:
+        folder.form_set.update(folder_id=folder.owner_user.root_folder_id)
     folder.delete()
     return rest_ok()
 
@@ -147,7 +151,12 @@ def create(request, data):
     # TODO: folder id
     title = ensure_str(data['title'])
     body = ensure_dict(data['body'])
-    form = Form(title=title, body=body, folder=request.user.root_folder)
+    folder_id = data['folder_id']
+    if folder_id is None:
+        folder = request.user.root_folder
+    else:
+        folder = get_owned_folder(request, data)
+    form = Form(title=title, body=body, folder=folder)
     save_or_400(form)
     return rest_ok()
 
