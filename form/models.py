@@ -2,10 +2,13 @@ from django.db import models
 from django.conf import settings
 from django.utils.timezone import now
 
+from org.models import Org
+
 
 class Folder(models.Model):
     name = models.CharField(max_length=200)
     owner_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
+    owner_org = models.ForeignKey(Org, on_delete=models.CASCADE, blank=True, null=True)
 
     def info(self) -> dict[str]:
         return {

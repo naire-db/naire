@@ -22,4 +22,6 @@ urlpatterns = [
     path('remove_folder/', views.remove_folder, name='remove_folder'),
     path('move_to_folder/', views.move_to_folder, name='move_to_folder'),
     path('copy/', views.copy, name='copy'),
+
+    path('get_org_overview/', views.get_org_overview, name='get_org_overview'),
 ]

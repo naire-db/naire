@@ -31,6 +31,12 @@ class Org(models.Model):
             'invite_token': self.invite_token,
         }
 
+    def basic_info(self):
+        return {
+            'id': self.id,
+            'name': self.name
+        }
+
 
 class Membership(models.Model):
     class Role(models.IntegerChoices):
