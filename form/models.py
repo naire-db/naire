@@ -22,7 +22,7 @@ class Form(models.Model):
     title = models.CharField(max_length=200)
     ctime = models.DateTimeField(auto_now_add=True)
     body = models.JSONField()
-    folder = models.ForeignKey(Folder, on_delete=models.PROTECT)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
 
     def info(self) -> dict[str]:
         return {
