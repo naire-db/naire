@@ -56,6 +56,10 @@ class Membership(models.Model):
         return {
             **self.org.common_info(),
             'role': self.role,
+            'can_leave': not (
+                self.role >= Membership.Role.OWNER and
+                self.org.membership_set.filter(role=Membership.Role.OWNER).count() <= 1
+            ),
         }
 
     def member_info(self) -> dict[str]:

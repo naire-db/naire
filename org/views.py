@@ -59,6 +59,14 @@ def get_members(request, data):
     })
 
 
+@check_logged_in
+@acquire_json
+def leave(request, data):
+    _, m = get_joined_org_membership(request, data)
+    m.delete()
+    return rest_ok()
+
+
 @acquire_json
 def check_invite_token(request, data):
     token = ensure_str(data['token'])

@@ -4,8 +4,9 @@ from . import views
 
 urlpatterns = [
     path('get_joined/', views.get_joined, name='get_joined'),
-    path('get_members/', views.get_members, name='get_members'),
     path('create/', views.create, name='create'),
+    path('get_members/', views.get_members, name='get_members'),
+    path('leave/', views.leave, name='leave'),
 
     path('check_invite_token/', views.check_invite_token, name='check_invite_token'),
     path('accept_invite/', views.accept_invite, name='accept_invite'),
