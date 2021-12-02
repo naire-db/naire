@@ -25,6 +25,8 @@ def create(request, data):
     folder.save()
     org = Org(name=name, root_folder=folder)
     save_or_400(org)
+    folder.owner_org = org
+    folder.save()
     m = Membership(user=request.user, org=org, role=Membership.Role.OWNER)
     m.save()
     return rest_data(org.id)
