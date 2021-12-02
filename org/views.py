@@ -49,8 +49,9 @@ def get_joined_org_membership(request, data) -> tuple[Org, Membership]:
 @check_logged_in
 @acquire_json
 def get_members(request, data):
-    org, _ = get_joined_org_membership(request, data)
+    org, m = get_joined_org_membership(request, data)
     return rest_data({
         'name': org.name,
+        'role': m.role,
         'members': [m.member_info() for m in org.membership_set.all()],
     })
