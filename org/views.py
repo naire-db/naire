@@ -4,7 +4,7 @@ from django.views.decorators.http import require_safe
 
 from common.deco import check_logged_in
 from common.models import save_or_400
-from common.rest import acquire_json, rest_data, rest_ok
+from common.rest import acquire_json, rest_data, rest_ok, rest_fail
 from common.types import ensure_str, ensure_int
 
 from form.models import Folder
@@ -55,6 +55,34 @@ def get_members(request, data):
         'role': m.role,
         'members': [m.member_info() for m in org.membership_set.all()],
     })
+
+
+@acquire_json
+def check_invite_token(request, data):
+    token = ensure_str(data['token'])
+    try:
+        org = Org.objects.get(invite_token=token)
+    except Org.DoesNotExist:
+        return rest_fail()
+    return rest_data({
+        'joined': request.user.is_authenticated and org.membership_set.filter(user=request.user).exists(),
+        'org': org.common_info(),
+    })
+
+
+@check_logged_in
+@acquire_json
+def accept_invite(request, data):
+    token = ensure_str(data['token'])
+    oid = ensure_int(data['oid'])
+    try:
+        org = Org.objects.get(id=oid)
+    except Org.DoesNotExist:
+        return rest_fail()
+    if org.invite_token != token:
+        return rest_fail()
+    org.members.add(request.user)  # TODO: exists?
+    return rest_ok()
 
 
 @check_logged_in
