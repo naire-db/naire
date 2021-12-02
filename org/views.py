@@ -1,4 +1,4 @@
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, BadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_safe
 
@@ -108,3 +108,37 @@ def refresh_invite_token(request, data):
     res = org.invite_token = generate_invite_token()
     org.save()
     return rest_data(res)
+
+
+def get_owned_membership(request, data) -> Membership:
+    org, _ = get_owned_org_membership(request, data)
+    uid = ensure_int(data['uid'])
+    if uid == request.user.id:
+        raise BadRequest
+    return get_object_or_404(org.membership_set, user_id=uid)
+
+
+@check_logged_in
+@acquire_json
+def remove_member(request, data):
+    m = get_owned_membership(request, data)
+    m.delete()
+    return rest_ok()
+
+
+@check_logged_in
+@acquire_json
+def change_role(request, data):
+    role = ensure_int(data['role'])
+    m = get_owned_membership(request, data)
+    m.role = role
+    m.save()
+    return rest_ok()
+
+
+@check_logged_in
+@acquire_json
+def dissolve(request, data):
+    org, _ = get_owned_org_membership(request, data)
+    org.delete()
+    return rest_ok()

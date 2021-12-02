@@ -12,5 +12,8 @@ urlpatterns = [
 
     path('get_profile/', views.get_profile, name='get_profile'),
     path('rename/', views.rename, name='rename'),
-    path('refresh_invite_token/', views.refresh_invite_token, name='refresh_invite_token')
+    path('refresh_invite_token/', views.refresh_invite_token, name='refresh_invite_token'),
+    path('remove_member/', views.remove_member, name='remove_member'),
+    path('change_role/', views.change_role, name='change_role'),
+    path('dissolve/', views.dissolve, name='dissolve'),
 ]
