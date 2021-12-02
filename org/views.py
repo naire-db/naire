@@ -4,11 +4,11 @@ from django.views.decorators.http import require_safe
 
 from common.deco import check_logged_in
 from common.models import save_or_400
-from common.rest import acquire_json, rest_data
+from common.rest import acquire_json, rest_data, rest_ok
 from common.types import ensure_str, ensure_int
 
 from form.models import Folder
-from .models import Org, Membership
+from .models import Org, Membership, generate_invite_token
 
 
 @require_safe
@@ -51,7 +51,32 @@ def get_joined_org_membership(request, data) -> tuple[Org, Membership]:
 def get_members(request, data):
     org, m = get_joined_org_membership(request, data)
     return rest_data({
-        'name': org.name,
+        **org.common_info(),
         'role': m.role,
         'members': [m.member_info() for m in org.membership_set.all()],
     })
+
+
+@check_logged_in
+@acquire_json
+def get_profile(request, data):
+    org, _ = get_owned_org_membership(request, data)
+    return rest_data(org.privileged_info())
+
+
+@check_logged_in
+@acquire_json
+def rename(request, data):
+    org, _ = get_owned_org_membership(request, data)
+    org.name = ensure_str(data['name'])
+    save_or_400(org)
+    return rest_ok()
+
+
+@check_logged_in
+@acquire_json
+def refresh_invite_token(request, data):
+    org, _ = get_owned_org_membership(request, data)
+    res = org.invite_token = generate_invite_token()
+    org.save()
+    return rest_data(res)
