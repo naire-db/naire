@@ -7,7 +7,10 @@ urlpatterns = [
     path('get_detail/', views.get_detail, name='get_detail'),
     path('save_resp/', views.save_resp, name='save_resp'),
     path('save_title/', views.save_title, name='save_title'),
-    path('change_body/', views.change_body, name='change_body'),
+
+    path('get_status/', views.get_status, name='get_status'),
+    path('get_resp_count/', views.get_resp_count, name='get_resp_count'),
+    path('remake/', views.remake, name='remake'),
     path('remove/', views.remove, name='remove'),
 
     path('get_form_resps/', views.get_form_resps, name='get_form_resps'),
@@ -16,6 +19,7 @@ urlpatterns = [
     path('remove_resp/', views.remove_resp, name='remove_resp'),
 
     path('get_overview/', views.get_overview, name='get_overview'),
+    path('get_folder_overview/', views.get_folder_overview, name='get_folder_overview'),
     path('get_folder_all/', views.get_folder_all, name='get_folder_all'),
     path('create_folder/', views.create_folder, name='create_folder'),
     path('rename_folder/', views.rename_folder, name='rename_folder'),

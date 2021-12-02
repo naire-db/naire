@@ -21,19 +21,60 @@ def get_admin_org(user: User, oid: int):
     return org
 
 
+def add_overview_base(user: User, d: dict[str]):
+    admin_mss = user.membership_set.filter(role__gte=Membership.Role.ADMIN)
+    d['admin_orgs'] = [f.org.basic_info() for f in admin_mss]
+
+
+def get_raw_overview(user: User):
+    root_forms = Form.objects.filter(folder=user.root_folder)
+    folders = Folder.objects.filter(owner_user=user)
+    res = {
+        'root_fid': user.root_folder_id,
+        'root_forms': [f.info() for f in root_forms],
+        'folders': [f.info() for f in folders],
+    }
+    add_overview_base(user, res)
+    return res
+
+
 @require_safe
 @check_logged_in
 def get_overview(request):
-    user: User = request.user
-    root_forms = Form.objects.filter(folder=user.root_folder)
-    folders = Folder.objects.filter(owner_user=user)
-    admin_mss = user.membership_set.filter(role__gte=Membership.Role.ADMIN)
-    return rest_data({
-        'root_fid': request.user.root_folder_id,
+    return rest_data(get_raw_overview(request.user))
+
+
+def get_raw_org_overview(user: User, org: Org):
+    root_forms = Form.objects.filter(folder=org.root_folder)
+    folders = Folder.objects.filter(owner_org=org)
+    return {
+        'root_fid': org.root_folder_id,
         'root_forms': [f.info() for f in root_forms],
         'folders': [f.info() for f in folders],
-        'admin_orgs': [f.org.basic_info() for f in admin_mss]
-    })
+    }
+
+
+@check_logged_in
+@acquire_json
+def get_org_overview(request, data):
+    oid = ensure_int(data['oid'])
+    org = get_admin_org(request.user, oid)
+    return rest_data(get_raw_org_overview(request.user, org))
+
+
+@check_logged_in
+@acquire_json
+def get_folder_overview(request, data):
+    folder = get_owned_folder(request, data)
+    user: User = request.user
+    if folder.owner_org:
+        res = get_raw_org_overview(request.user, folder.owner_org)
+        add_overview_base(user, res)
+        res['context'] = folder.owner_org_id
+    else:
+        res = get_raw_overview(user)
+        res['context'] = None
+    return rest_data(res)
 
 
 def ensure_owned_folder(user: User, folder: Folder):
@@ -197,12 +238,28 @@ def save_title(request, data):
 
 @check_logged_in
 @acquire_json
-def change_body(request, data):
+def get_status(request, data):
     form = get_owned_form(request, data)
+    return rest_data(form.status())
+
+
+@check_logged_in
+@acquire_json
+def get_resp_count(request, data):
+    form = get_owned_form(request, data)
+    return rest_data(form.response_set.count())
+
+
+@check_logged_in
+@acquire_json
+def remake(request, data):
+    form = get_owned_form(request, data)
+    title = ensure_str(data['title'])
     body = ensure_dict(data['body'])
-    form.response_set.all().delete()
     form.body = body
-    form.save()
+    form.title = title
+    save_or_400(form)
+    form.response_set.all().delete()
     return rest_ok()
 
 
@@ -247,18 +304,3 @@ def remove_resp(request, data):
     resp, _ = get_owned_resp_form(request, data)
     resp.delete()
     return rest_ok()
-
-
-@check_logged_in
-@acquire_json
-def get_org_overview(request, data):
-    oid = ensure_int(data['oid'])
-    org = get_admin_org(request.user, oid)
-
-    root_forms = Form.objects.filter(folder=org.root_folder)
-    folders = Folder.objects.filter(owner_org=org)
-    return rest_data({
-        'root_fid': org.root_folder_id,
-        'root_forms': [f.info() for f in root_forms],
-        'folders': [f.info() for f in folders],
-    })

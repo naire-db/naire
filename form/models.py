@@ -38,6 +38,13 @@ class Form(models.Model):
             'body': self.body
         }
 
+    def status(self) -> dict[str]:
+        return {
+            'title': self.title,
+            'body': self.body,
+            'folder_id': self.folder.id,
+        }
+
     def make_cloned(self, folder: Folder, title: str):
         self.folder = folder
         self.title = title
