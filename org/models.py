@@ -18,6 +18,19 @@ class Org(models.Model):
     ctime = models.DateTimeField(auto_now_add=True)
     invite_token = models.SlugField(max_length=32, unique=True, default=generate_invite_token)
 
+    def member_info(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'member_count': self.members.count(),
+        }
+
+    def owner_info(self):
+        return {
+            **self.member_info(),
+            'invite_token': self.invite_token,
+        }
+
 
 class Membership(models.Model):
     class Role(models.IntegerChoices):
@@ -35,9 +48,7 @@ class Membership(models.Model):
 
     def org_info(self) -> dict[str]:
         return {
-            'id': self.org.id,
-            'name': self.org.name,
-            'member_count': self.org.members.count(),
+            **self.org.member_info(),
             'role': self.role,
         }
 

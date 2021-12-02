@@ -39,13 +39,18 @@ def get_owned_org_membership(request, data) -> tuple[Org, Membership]:
     return org, m
 
 
+def get_joined_org_membership(request, data) -> tuple[Org, Membership]:
+    oid = ensure_int(data['oid'])
+    org = get_object_or_404(Org, id=oid)
+    m = get_object_or_404(org.membership_set, user=request.user)
+    return org, m
+
+
 @check_logged_in
 @acquire_json
 def get_members(request, data):
-    org, _ = get_owned_org_membership(request, data)
-    # TODO: include a share token
+    org, _ = get_joined_org_membership(request, data)
     return rest_data({
         'name': org.name,
-        'invite_token': org.invite_token,
         'members': [m.member_info() for m in org.membership_set.all()],
     })
