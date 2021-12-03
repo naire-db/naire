@@ -1,11 +1,14 @@
 from django.core.exceptions import PermissionDenied, BadRequest
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import localtime
 from django.views.decorators.http import require_safe
 
 from common.deco import check_logged_in
+from common.errors import ERR_EXPIRED, ERR_AUTH_REQUIRED, ERR_DENIED, ERR_LIMITED
+from common.log import logger
 from common.models import save_or_400, get_user
-from common.rest import rest_data, acquire_json, rest_ok, rest_fail
+from common.rest import rest_data, acquire_json, rest_ok, rest_fail, rest
 from common.types import ensure_str, ensure_dict, ensure_int, ensure_bool, ensure_number, ensure_datetime
 
 from user.models import User
@@ -201,6 +204,39 @@ def create(request, data):
     return rest_ok()
 
 
+def ensure_form_fillable(user: User, form: Form):
+    if form.update_published():
+        form.save()
+
+    if not form.published:
+        return ERR_EXPIRED
+
+    if not user.is_authenticated and (form.login_required or form.member_required):
+        return ERR_AUTH_REQUIRED
+
+    if form.member_required and not form.folder.owner_org.members.filter(id=user.id).exists():
+        return ERR_DENIED
+
+    if form.login_required:
+        if form.user_limit == Form.Limit.ONCE:
+            if form.response_set.filter(user=user).exists():
+                return ERR_LIMITED
+        elif form.user_limit == Form.Limit.DAILY:
+            if resp := form.response_set.filter(user=user).order_by('id').last():
+                last_time = localtime(resp.ctime)
+                now = localtime()
+                dt = now - last_time
+                if dt.days < 1:
+                    lt = last_time.time()
+                    rt = now.time()
+                    mt = form.user_limit_reset_time
+                    logger.error(f'{(lt, rt, mt)}')
+                    if not ((lt <= rt and lt <= mt < rt) or (lt > rt and (lt <= mt or mt < rt))):
+                        return ERR_LIMITED
+
+    # TODO: check ip
+
+
 @acquire_json
 def get_detail(request, data):
     fid = ensure_int(data['fid'])
@@ -209,8 +245,8 @@ def get_detail(request, data):
     except Form.DoesNotExist:
         return rest_fail()
 
-    # TODO: Check (future) permissions.
-    #  Maybe we shouldn't distinguish permission denying from nonexistence in the result code for security?
+    if code := ensure_form_fillable(request.user, form):
+        return rest(code=code)
 
     return rest_data(form.detail())
 
@@ -221,6 +257,10 @@ def save_resp(request, data):
     resp_body = ensure_dict(data['resp_body'])
     # TODO: After we implement Orgs, some member might delete a Form which another is editing.
     form = get_object_or_404(Form, id=fid)
+
+    if code := ensure_form_fillable(request.user, form):
+        return rest(code=code)
+
     resp = Response(form=form, body=resp_body, user=get_user(request))
     resp.save()
     return rest_ok()
