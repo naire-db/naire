@@ -9,7 +9,6 @@ from django.views.decorators.http import require_safe
 
 from common.deco import check_logged_in
 from common.errors import ERR_EXPIRED, ERR_AUTH_REQUIRED, ERR_DENIED, ERR_LIMITED
-from common.log import logger
 from common.models import save_or_400, get_user
 from common.rest import rest_data, acquire_json, rest_ok, rest_fail, rest
 from common.types import ensure_str, ensure_dict, ensure_int, ensure_bool, ensure_datetime
@@ -209,7 +208,6 @@ def create(request, data):
 
 def check_limit(form: Form, limit: int, reset_time: datetime.time, q: Q):
     if limit == Form.Limit.ONCE:
-        logger.error(str(('QAQ', form, q)))
         if form.response_set.filter(q).exists():
             return ERR_LIMITED
     elif limit == Form.Limit.DAILY:
