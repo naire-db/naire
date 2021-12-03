@@ -1,4 +1,5 @@
-from datetime import time
+from datetime import time, datetime
+from typing import Optional
 
 from django.db import models
 from django.conf import settings
@@ -18,6 +19,14 @@ class Folder(models.Model):
             'name': self.name,
             'form_count': self.form_set.count()
         }
+
+
+def present_datetime_or_none(t: Optional[datetime]):
+    return None if t is None else t.timestamp()
+
+
+def present_time(t: time):
+    return str(t)[:5]
 
 
 class Form(models.Model):
@@ -44,11 +53,14 @@ class Form(models.Model):
     ip_limit_reset_time = models.TimeField(default=time(0, 0, 0))
 
     def info(self) -> dict[str]:
+        if self.update_published():
+            self.save()
         return {
             'id': self.id,
             'title': self.title,
             'ctime': self.ctime.timestamp(),
-            'resp_count': self.response_set.count()
+            'resp_count': self.response_set.count(),
+            'published': self.published
         }
 
     def detail(self) -> dict[str]:
@@ -61,6 +73,47 @@ class Form(models.Model):
         self.folder = folder
         self.title = title
         self.ctime = now()
+
+    def settings(self) -> dict[str]:
+        org = self.folder.owner_org
+        return {
+            'form': self.info(),
+            'settings': {
+                k: getattr(self, k)
+                for k in (
+                    'published',
+                    'passphrase',
+                    'login_required', 'member_required',
+                    'user_limit', 'ip_limit',
+                )
+            } | {
+                'publish_time': present_datetime_or_none(self.publish_time),
+                'unpublish_time': present_datetime_or_none(self.unpublish_time),
+                'user_limit_reset_time': present_time(self.user_limit_reset_time),
+                'ip_limit_reset_time': present_time(self.ip_limit_reset_time),
+            },
+            'org_name': None if org is None else org.name,
+        }
+
+    # Return if published field changes.
+    def update_published(self) -> bool:
+        if self.publish_time:
+            tz = self.publish_time.tzinfo
+        elif self.unpublish_time:
+            tz = self.unpublish_time.tzinfo
+        else:
+            tz = None
+        n = datetime.now(tz)
+        if self.published:
+            if self.unpublish_time and n >= self.unpublish_time:
+                self.published = False
+                return True
+            return False
+
+        if (not self.unpublish_time or n < self.unpublish_time) and self.publish_time and n >= self.publish_time:
+            self.published = True
+            return True
+        return False
 
 
 class Response(models.Model):

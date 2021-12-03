@@ -19,6 +19,9 @@ urlpatterns = [
     path('get_resp_detail/', views.get_resp_detail, name='get_resp_detail'),
     path('remove_resp/', views.remove_resp, name='remove_resp'),
 
+    path('get_form_settings/', views.get_form_settings, name='get_form_settings'),
+    path('save_form_settings/', views.save_form_settings, name='save_form_settings'),
+
     path('get_overview/', views.get_overview, name='get_overview'),
     path('get_folder_overview/', views.get_folder_overview, name='get_folder_overview'),
     path('get_folder_all/', views.get_folder_all, name='get_folder_all'),

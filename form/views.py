@@ -1,4 +1,4 @@
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, BadRequest
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_safe
@@ -6,7 +6,7 @@ from django.views.decorators.http import require_safe
 from common.deco import check_logged_in
 from common.models import save_or_400, get_user
 from common.rest import rest_data, acquire_json, rest_ok, rest_fail
-from common.types import ensure_str, ensure_dict, ensure_int
+from common.types import ensure_str, ensure_dict, ensure_int, ensure_bool, ensure_number, ensure_datetime
 
 from user.models import User
 from org.models import Membership, Org
@@ -310,4 +310,44 @@ def get_resp_detail(request, data):
 def remove_resp(request, data):
     resp, _ = get_owned_resp_form(request, data)
     resp.delete()
+    return rest_ok()
+
+
+@check_logged_in
+@acquire_json
+def get_form_settings(request, data):
+    form = get_owned_form(request, data)
+    return rest_data(form.settings())
+
+
+@check_logged_in
+@acquire_json
+def save_form_settings(request, data):
+    form = get_owned_form(request, data)
+    data = ensure_dict(data['settings'])
+    title = data['title']
+    if not title:
+        raise BadRequest
+    form.title = title
+    form.published = ensure_bool(data['published'])
+    lt = data['publish_time']
+    if form.published or lt is None:
+        form.publish_time = None
+    else:
+        form.publish_time = ensure_datetime(lt)
+    rt = data['unpublish_time']
+    form.unpublish_time = None if rt is None else ensure_datetime(rt)
+    pp = data['passphrase']
+    form.passphrase = None if pp is None else pp
+    form.member_required = mr = ensure_bool(data['member_required'])
+    if mr and form.folder.owner_org is None:
+        raise BadRequest
+    lr = ensure_bool(data['login_required'])
+    form.login_required = mr or lr
+    form.user_limit = ensure_int(data['user_limit'])
+    form.ip_limit = ensure_int(data['ip_limit'])
+    form.user_limit_reset_time = ensure_str(data['user_limit_reset_time'])
+    form.ip_limit_reset_time = ensure_str(data['ip_limit_reset_time'])
+    form.update_published()
+    save_or_400(form)
     return rest_ok()
