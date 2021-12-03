@@ -9,7 +9,7 @@ from common.errors import ERR_EXPIRED, ERR_AUTH_REQUIRED, ERR_DENIED, ERR_LIMITE
 from common.log import logger
 from common.models import save_or_400, get_user
 from common.rest import rest_data, acquire_json, rest_ok, rest_fail, rest
-from common.types import ensure_str, ensure_dict, ensure_int, ensure_bool, ensure_number, ensure_datetime
+from common.types import ensure_str, ensure_dict, ensure_int, ensure_bool, ensure_datetime
 
 from user.models import User
 from org.models import Membership, Org
