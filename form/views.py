@@ -1,4 +1,7 @@
+import datetime
+
 from django.core.exceptions import PermissionDenied, BadRequest
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime
@@ -204,37 +207,47 @@ def create(request, data):
     return rest_ok()
 
 
-def ensure_form_fillable(user: User, form: Form):
+def check_limit(form: Form, limit: int, reset_time: datetime.time, q: Q):
+    if limit == Form.Limit.ONCE:
+        logger.error(str(('QAQ', form, q)))
+        if form.response_set.filter(q).exists():
+            return ERR_LIMITED
+    elif limit == Form.Limit.DAILY:
+        if resp := form.response_set.filter(q).order_by('id').last():
+            last_time = localtime(resp.ctime)
+            now = localtime()
+            dt = now - last_time
+            if dt.days < 1:
+                lt = last_time.time()
+                rt = now.time()
+                mt = reset_time
+                if not ((lt <= rt and lt <= mt < rt) or (lt > rt and (lt <= mt or mt < rt))):
+                    return ERR_LIMITED
+
+
+def ensure_form_fillable(request, form: Form):
+    user: User = request.user
+
     if form.update_published():
         form.save()
 
     if not form.published:
         return ERR_EXPIRED
 
-    if not user.is_authenticated and (form.login_required or form.member_required):
+    lr = form.login_required or form.member_required
+
+    if not user.is_authenticated and lr:
         return ERR_AUTH_REQUIRED
 
     if form.member_required and not form.folder.owner_org.members.filter(id=user.id).exists():
         return ERR_DENIED
 
-    if form.login_required:
-        if form.user_limit == Form.Limit.ONCE:
-            if form.response_set.filter(user=user).exists():
-                return ERR_LIMITED
-        elif form.user_limit == Form.Limit.DAILY:
-            if resp := form.response_set.filter(user=user).order_by('id').last():
-                last_time = localtime(resp.ctime)
-                now = localtime()
-                dt = now - last_time
-                if dt.days < 1:
-                    lt = last_time.time()
-                    rt = now.time()
-                    mt = form.user_limit_reset_time
-                    logger.error(f'{(lt, rt, mt)}')
-                    if not ((lt <= rt and lt <= mt < rt) or (lt > rt and (lt <= mt or mt < rt))):
-                        return ERR_LIMITED
+    if lr:
+        if err := check_limit(form, form.user_limit, form.user_limit_reset_time, Q(user=user)):
+            return err
 
-    # TODO: check ip
+    if err := check_limit(form, form.ip_limit, form.ip_limit_reset_time, Q(ip=get_client_ip(request))):
+        return err
 
 
 @acquire_json
@@ -245,10 +258,16 @@ def get_detail(request, data):
     except Form.DoesNotExist:
         return rest_fail()
 
-    if code := ensure_form_fillable(request.user, form):
+    if code := ensure_form_fillable(request, form):
         return rest(code=code)
 
     return rest_data(form.detail())
+
+
+def get_client_ip(request):
+    if xff := request.META.get('HTTP_X_FORWARDED_FOR'):
+        return xff.split(',')[0]
+    return request.META.get('REMOTE_ADDR')
 
 
 @acquire_json
@@ -258,10 +277,10 @@ def save_resp(request, data):
     # TODO: After we implement Orgs, some member might delete a Form which another is editing.
     form = get_object_or_404(Form, id=fid)
 
-    if code := ensure_form_fillable(request.user, form):
+    if code := ensure_form_fillable(request, form):
         return rest(code=code)
 
-    resp = Response(form=form, body=resp_body, user=get_user(request))
+    resp = Response(form=form, body=resp_body, user=get_user(request), ip=get_client_ip(request))
     resp.save()
     return rest_ok()
 

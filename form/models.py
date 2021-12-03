@@ -116,6 +116,8 @@ class Response(models.Model):
     body = models.JSONField()
     ctime = models.DateTimeField(auto_now_add=True)
 
+    ip = models.GenericIPAddressField()
+
     def info(self) -> dict[str]:
         return {
             'id': self.id,
