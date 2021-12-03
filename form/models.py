@@ -62,3 +62,11 @@ class Response(models.Model):
             'id': self.id,
             'body': self.body
         }
+
+    def full_detail(self) -> dict[str]:
+        return {
+            'id': self.id,
+            'ctime': self.ctime.timestamp(),
+            'user': None if self.user is None else self.user.description(),
+            'body': self.body
+        }

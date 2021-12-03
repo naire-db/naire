@@ -293,6 +293,13 @@ def get_form_stats(request, data):
 
 @check_logged_in
 @acquire_json
+def get_form_resp_full_details(request, data):
+    form = get_owned_form(request, data)
+    return rest_data([r.full_detail() for r in form.response_set.all()])
+
+
+@check_logged_in
+@acquire_json
 def get_resp_detail(request, data):
     resp, _ = get_owned_resp_form(request, data)
     return rest_data(resp.detail())
