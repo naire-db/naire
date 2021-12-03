@@ -357,6 +357,8 @@ def remove_resp(request, data):
 @acquire_json
 def get_form_settings(request, data):
     form = get_owned_form(request, data)
+    if form.update_published():
+        form.save()
     return rest_data(form.settings())
 
 
