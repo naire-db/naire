@@ -1,3 +1,5 @@
+from datetime import time
+
 from django.db import models
 from django.conf import settings
 from django.utils.timezone import now
@@ -23,6 +25,23 @@ class Form(models.Model):
     ctime = models.DateTimeField(auto_now_add=True)
     body = models.JSONField()
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
+
+    published = models.BooleanField(default=True)
+    publish_time = models.DateTimeField(null=True, blank=True)
+    unpublish_time = models.DateTimeField(null=True, blank=True)
+    passphrase = models.CharField(max_length=100, null=True, blank=True)
+    login_required = models.BooleanField(default=False)  # read as True when member_required presents
+    member_required = models.BooleanField(default=False)
+
+    class Limit(models.IntegerChoices):
+        UNLIMITED = 0
+        DAILY = 1
+        ONCE = 2
+
+    user_limit = models.IntegerField(choices=Limit.choices, default=Limit.UNLIMITED)  # does nothing without login_required
+    user_limit_reset_time = models.TimeField(default=time(0, 0, 0))
+    ip_limit = models.IntegerField(choices=Limit.choices, default=Limit.UNLIMITED)
+    ip_limit_reset_time = models.TimeField(default=time(0, 0, 0))
 
     def info(self) -> dict[str]:
         return {
