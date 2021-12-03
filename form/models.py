@@ -44,8 +44,8 @@ class Form(models.Model):
 
     class Limit(models.IntegerChoices):
         UNLIMITED = 0
-        DAILY = 1
-        ONCE = 2
+        ONCE = 1
+        DAILY = 2
 
     user_limit = models.IntegerField(choices=Limit.choices, default=Limit.UNLIMITED)  # does nothing without login_required
     user_limit_reset_time = models.TimeField(default=time(0, 0, 0))
@@ -97,13 +97,7 @@ class Form(models.Model):
 
     # Return if published field changes.
     def update_published(self) -> bool:
-        if self.publish_time:
-            tz = self.publish_time.tzinfo
-        elif self.unpublish_time:
-            tz = self.unpublish_time.tzinfo
-        else:
-            tz = None
-        n = datetime.now(tz)
+        n = now()
         if self.published:
             if self.unpublish_time and n >= self.unpublish_time:
                 self.published = False
