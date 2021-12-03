@@ -1,5 +1,8 @@
 from datetime import datetime
 
+from django.utils.timezone import make_aware
+
+
 def ensure_int(o) -> int:
     if not isinstance(o, int):
         raise TypeError
@@ -32,6 +35,6 @@ def ensure_number(o) -> float:
 
 def ensure_datetime(o) -> datetime:
     try:
-        return datetime.utcfromtimestamp(ensure_number(o))
+        return make_aware(datetime.fromtimestamp(ensure_number(o)))
     except (OverflowError, OSError):
         raise TypeError
