@@ -2,7 +2,7 @@
 set -e
 cd "$(dirname "$0")/.."
 
-APPS="user form org"
+APPS="user form org attachment"
 
 remake() {
     sudo mysql < tools/remake.sql
