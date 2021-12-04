@@ -21,5 +21,5 @@ urlpatterns = [
     path('auth/', include('user.urls')),
     path('form/', include('form.urls')),
     path('org/', include('org.urls')),
-    path('attachment/', include('attachment.urls')),
+    path('file/', include('attachment.urls')),
 ]

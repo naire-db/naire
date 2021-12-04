@@ -1,3 +1,5 @@
+import os.path
+
 from django.db import models
 
 from form.models import Response, Form
@@ -23,19 +25,12 @@ class Attachment(models.Model):
 
 
 class Image(models.Model):
-    image = models.FileField(upload_to='images/')
-    name = models.CharField(max_length=200)
+    file = models.FileField(upload_to='images/')
+    filename = models.CharField(max_length=200)
     form = models.ForeignKey(Form, on_delete=models.CASCADE, blank=True, null=True)
 
-    def info(self) -> dict[str]:
-        return {
-            'id': self.id,
-            'name': self.name,
-            'form_id': self.form_id,
-        }
-
-    def detail(self) -> dict[str]:
-        return {
-            'name': self.name,
-            'form_id': self.form_id,
-        }
+    def set_filename(self, s):
+        if len(s) > 200:
+            base, ext = os.path.splitext(s)
+            s = base[:200 - len(ext)] + ext
+        self.filename = s

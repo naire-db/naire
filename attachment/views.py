@@ -1,21 +1,27 @@
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, BadRequest
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_safe
 
+from common.deco import check_logged_in
+from common.log import logger
+from common.rest import rest_data
+
+from naire import settings
+
 from attachment.forms import AttachmentForm, ImageForm
 from attachment.models import Attachment, Image
-from common.deco import check_logged_in
-from naire import settings
-from common.rest import rest_fail, rest_data
 
 
 def save_form_or_400(form):
     if form.is_valid():
         try:
-            return form.save()
-        except ValueError:
-            raise PermissionDenied
+            return form.save(commit=False)
+        except Exception as e:
+            logger.error(f'attachment form: {type(e).__name__} {e}')
+            raise BadRequest
+    else:
+        raise BadRequest
 
 
 @require_POST
@@ -44,21 +50,18 @@ def download_file(request, fid):
 @require_POST
 def upload_image(request):
     form = ImageForm(request.POST, request.FILES)
-    obj = save_form_or_400(form)
-    if obj:
-        obj.name = obj.image.path.split('/')[-1]
-        obj.save()
-        return rest_data(obj.id)
+    file = request.FILES.get('file')
+    if file.size > 10 * 1024 * 1024:
+        raise BadRequest
+    image: Image = save_form_or_400(form)
+    image.set_filename(file.name)
+    image.save()
+    return rest_data(image.id)
     # TODO: add form_id after form submit
-    if settings.DEBUG:
-        for field in form:
-            print('Field Error:', field.name, field.errors)
-    return HttpResponse(status=415)  # Unsupported Media Type
 
 
 @require_safe
-@check_logged_in
-def download_image(request, image_id):
+def get_image(request, image_id):
     # TODO: check response's authority
-    obj = get_object_or_404(Image, id=image_id)
-    return FileResponse(open(obj.image.path, 'rb'))
+    image = get_object_or_404(Image, id=image_id)
+    return FileResponse(image.file, filename=image.filename)
