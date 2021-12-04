@@ -1,13 +1,11 @@
-from django.core.exceptions import PermissionDenied, BadRequest
-from django.http import FileResponse, HttpResponse
+from django.core.exceptions import BadRequest
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_safe
 
 from common.deco import check_logged_in
 from common.log import logger
 from common.rest import rest_data
-
-from naire import settings
 
 from attachment.forms import AttachmentForm, ImageForm
 from attachment.models import Attachment, Image
@@ -27,24 +25,22 @@ def save_form_or_400(form):
 @require_POST
 def upload_file(request):
     form = AttachmentForm(request.POST, request.FILES)
-    obj = save_form_or_400(form)
-    if obj:
-        obj.name = obj.file.path.split('/')[-1]
-        obj.save()
-        return rest_data(obj.id)
-    # TODO: add resp_id after resp submit
-    if settings.DEBUG:
-        for field in form:
-            print('Field Error:', field.name, field.errors)
-    return HttpResponse(status=422)  # Unprocessable Entity
+    file = request.FILES.get('file')
+    if file.size > 20 * 1024 * 1024:
+        raise BadRequest
+    attachment: Attachment = save_form_or_400(form)
+    attachment.set_filename(file.name)
+    attachment.save()
+    return rest_data(attachment.id)
+    # TODO: add resp id
 
 
 @require_safe
 @check_logged_in
-def download_file(request, fid):
+def get_file(request, attachment_id):
     # TODO: check response's authority
-    attachment = get_object_or_404(Attachment, id=fid)
-    return FileResponse(open(attachment.file.path, 'rb'))
+    attachment = get_object_or_404(Attachment, id=attachment_id)
+    return FileResponse(attachment.file, filename=attachment.filename)
 
 
 @require_POST

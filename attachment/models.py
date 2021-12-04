@@ -5,23 +5,20 @@ from django.db import models
 from form.models import Response, Form
 
 
+def trim_filename(s: str) -> str:
+    if len(s) <= 200:
+        return s
+    base, ext = os.path.splitext(s)
+    return base[:200 - len(ext)] + ext
+
+
 class Attachment(models.Model):
-    file = models.FileField(upload_to='attachments/', max_length=1000)
+    file = models.FileField(upload_to='attachments/')
     name = models.CharField(max_length=200)
     resp = models.ForeignKey(Response, on_delete=models.CASCADE, blank=True, null=True)
 
-    def info(self) -> dict[str]:
-        return {
-            'id': self.id,
-            'name': self.name,
-            'resp_id': self.resp_id,
-        }
-
-    def detail(self) -> dict[str]:
-        return {
-            'name': self.name,
-            'resp_id': self.resp_id,
-        }
+    def set_filename(self, s):
+        self.filename = trim_filename(s)
 
 
 class Image(models.Model):
@@ -30,7 +27,4 @@ class Image(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE, blank=True, null=True)
 
     def set_filename(self, s):
-        if len(s) > 200:
-            base, ext = os.path.splitext(s)
-            s = base[:200 - len(ext)] + ext
-        self.filename = s
+        self.filename = trim_filename(s)
