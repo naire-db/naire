@@ -22,4 +22,5 @@ urlpatterns = [
     path('form/', include('form.urls')),
     path('org/', include('org.urls')),
     path('file/', include('attachment.urls')),
+    path('audit/', include('audit.urls')),
 ]

@@ -22,7 +22,33 @@ class IpSession(models.Model):
     ip = models.ForeignKey(Ip, on_delete=models.CASCADE)
 
 
+action_texts = {
+    'login': '登录',
+    'login_failed': '登录失败',
+    'register': '注册',
+    'change_password': '修改密码',
+    'change_password_failed': '修改密码失败',
+    'save_profile': '保存资料',
+    'create_form': '创建问卷',
+    'create_org': '创建组织',
+    'join_org': '加入组织',
+    'leave_org': '退出组织',
+    'dissolve_org': '解散组织',
+}
+
+
 class Log(models.Model):
     session = models.ForeignKey(IpSession, on_delete=models.CASCADE)
     time = models.DateTimeField(auto_now_add=True)
     action = models.CharField(max_length=100)
+    description = models.CharField(max_length=250, default='')
+
+    def detail(self) -> dict[str]:
+        action = action_texts.get(self.action, self.action)
+        if self.description:
+            action += ' (' + self.description + ')'
+        return {
+            'ip': self.session.ip.addr,
+            'time': self.time.timestamp(),
+            'action': action,
+        }
