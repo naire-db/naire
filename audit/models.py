@@ -45,6 +45,7 @@ class Log(models.Model):
     time = models.DateTimeField(auto_now_add=True)
     action = models.CharField(max_length=100)
     description = models.CharField(max_length=250, default='')
+    ua = models.CharField(max_length=100, default='')
 
     def detail(self) -> dict[str]:
         action = action_texts.get(self.action, self.action)
@@ -53,5 +54,6 @@ class Log(models.Model):
         return {
             'ip': self.session.ip.addr,
             'time': self.time.timestamp(),
+            'ua': self.ua,
             'action': action,
         }

@@ -1,10 +1,10 @@
 import inspect
 from typing import Optional
+from user_agents import parse
 
 from django.http import HttpRequest
 
 from common.models import get_user
-
 from user.models import User
 from .models import Log, Ip, IpSession
 
@@ -27,4 +27,9 @@ def save_log(request: HttpRequest,
         user = request.user
     ip = Ip.of(request)
     session = IpSession.objects.get_or_create(user=user, ip=ip)[0]
-    return Log.objects.create(session=session, action=action, description=desc)
+    ua = request.META.get('HTTP_USER_AGENT')
+    ua = str(parse(ua))[:100] if ua else ''
+    return Log.objects.create(session=session,
+                              ua=ua,
+                              action=action,
+                              description=desc)
