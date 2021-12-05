@@ -44,8 +44,8 @@ def login(request, data):
     else:
         username = username_or_email  # is username
         user = auth.authenticate(request, username=username, password=password)
-        save_log(request, 'login_failed', user=user)
         if user is None:
+            save_log(request, 'login_failed', user=user)
             return rest_fail()
     auth.login(request, user)
     logger.info(f'Logged: {user}')
