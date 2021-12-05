@@ -5,6 +5,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.timezone import now
 
+from audit.models import Ip
 from org.models import Org
 
 
@@ -116,7 +117,7 @@ class Response(models.Model):
     body = models.JSONField()
     ctime = models.DateTimeField(auto_now_add=True)
 
-    ip = models.GenericIPAddressField()
+    ip = models.ForeignKey(Ip, on_delete=models.SET_NULL, blank=True, null=True)
 
     def info(self) -> dict[str]:
         return {

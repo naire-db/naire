@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime
 from django.views.decorators.http import require_safe
 
+from audit.actions import get_ip
+from audit.models import Ip
 from common.deco import check_logged_in
 from common.errors import ERR_EXPIRED, ERR_AUTH_REQUIRED, ERR_DENIED, ERR_LIMITED
 from common.models import save_or_400, get_user
@@ -223,7 +225,7 @@ def check_limit(form: Form, limit: int, reset_time: datetime.time, q: Q):
                     return ERR_LIMITED
 
 
-def ensure_form_fillable(request, form: Form):
+def ensure_form_fillable(request, form: Form, ip: Ip):
     user: User = request.user
 
     if form.update_published():
@@ -244,7 +246,7 @@ def ensure_form_fillable(request, form: Form):
         if err := check_limit(form, form.user_limit, form.user_limit_reset_time, Q(user=user)):
             return err
 
-    if err := check_limit(form, form.ip_limit, form.ip_limit_reset_time, Q(ip=get_client_ip(request))):
+    if err := check_limit(form, form.ip_limit, form.ip_limit_reset_time, Q(ip=ip)):
         return err
 
 
@@ -256,16 +258,11 @@ def get_detail(request, data):
     except Form.DoesNotExist:
         return rest_fail()
 
-    if code := ensure_form_fillable(request, form):
+    ip = get_ip(request)
+    if code := ensure_form_fillable(request, form, ip):
         return rest(code=code)
 
     return rest_data(form.detail())
-
-
-def get_client_ip(request):
-    if xff := request.META.get('HTTP_X_FORWARDED_FOR'):
-        return xff.split(',')[0]
-    return request.META.get('REMOTE_ADDR')
 
 
 @acquire_json
@@ -275,10 +272,11 @@ def save_resp(request, data):
     # TODO: After we implement Orgs, some member might delete a Form which another is editing.
     form = get_object_or_404(Form, id=fid)
 
-    if code := ensure_form_fillable(request, form):
+    ip = get_ip(request)
+    if code := ensure_form_fillable(request, form, ip):
         return rest(code=code)
 
-    resp = Response(form=form, body=resp_body, user=get_user(request), ip=get_client_ip(request))
+    resp = Response(form=form, body=resp_body, user=get_user(request), ip=ip)
     resp.save()
     return rest_ok()
 
