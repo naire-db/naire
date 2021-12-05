@@ -15,5 +15,5 @@ def get_ip(request: HttpRequest) -> Ip:
 # login required
 def save_log(request: HttpRequest, action: str) -> Log:
     ip = Ip.of(request)
-    session = IpSession.objects.get_or_create(user=request.user, ip=ip)
+    session = IpSession.objects.get_or_create(user=request.user, ip=ip)[0]
     return Log.objects.create(session=session, action=action)
