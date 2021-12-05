@@ -16,12 +16,15 @@ def get_ip(request: HttpRequest) -> Ip:
     return ip
 
 
-def save_log(request: HttpRequest, action: Optional[str] = None, /, user: User = None) -> Log:
+def save_log(request: HttpRequest,
+             action: Optional[str] = None,
+             desc: str = '',
+             user: User = None,
+             ) -> Log:
     if action is None:
         action = inspect.stack()[1].function
     if user is None:
         user = request.user
-
     ip = Ip.of(request)
     session = IpSession.objects.get_or_create(user=user, ip=ip)[0]
-    return Log.objects.create(session=session, action=action)
+    return Log.objects.create(session=session, action=action, description=desc)
