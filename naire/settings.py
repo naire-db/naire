@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'audit.apps.AuditConfig',
     'attachment.apps.AttachmentConfig',
     'user.apps.UserConfig',
     'form.apps.FormConfig',
