@@ -39,13 +39,19 @@ def login(request, data):
         except User.DoesNotExist:
             return rest_fail()
         if not user.check_password(password):
+            # Saving 'login_failed' logs means that not all IpSessions are logged
             save_log(request, 'login_failed', user=user)
             return rest_fail()
     else:
         username = username_or_email  # is username
         user = auth.authenticate(request, username=username, password=password)
         if user is None:
-            save_log(request, 'login_failed', user=user)
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                pass
+            else:
+                save_log(request, 'login_failed', user=user)
             return rest_fail()
     auth.login(request, user)
     logger.info(f'Logged: {user}')
