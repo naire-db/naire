@@ -7,6 +7,7 @@ from common.models import save_or_400
 from common.rest import acquire_json, rest_data, rest_ok, rest_fail
 from common.types import ensure_str, ensure_int
 
+from audit.actions import save_log
 from form.models import Folder
 from .models import Org, Membership, generate_invite_token
 
@@ -29,6 +30,7 @@ def create(request, data):
     folder.save()
     m = Membership(user=request.user, org=org, role=Membership.Role.OWNER)
     m.save()
+    save_log(request, 'create_org', name)
     return rest_data(org.id)
 
 
@@ -62,8 +64,9 @@ def get_members(request, data):
 @check_logged_in
 @acquire_json
 def leave(request, data):
-    _, m = get_joined_org_membership(request, data)
+    org, m = get_joined_org_membership(request, data)
     m.delete()
+    save_log(request, 'leave_org', org.name)
     return rest_ok()
 
 
@@ -91,7 +94,8 @@ def accept_invite(request, data):
         return rest_fail()
     if org.invite_token != token:
         return rest_fail()
-    org.members.add(request.user)  # TODO: exists?
+    org.members.add(request.user)
+    save_log(request, 'join_org', org.name)
     return rest_ok()
 
 
@@ -151,4 +155,5 @@ def change_role(request, data):
 def dissolve(request, data):
     org, _ = get_owned_org_membership(request, data)
     org.delete()
+    save_log(request, 'dissolve_org', org.name)
     return rest_ok()

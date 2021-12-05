@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime
 from django.views.decorators.http import require_safe
 
-from audit.actions import get_ip
+from audit.actions import get_ip, save_log
 from audit.models import Ip
 from common.deco import check_logged_in
 from common.errors import ERR_EXPIRED, ERR_AUTH_REQUIRED, ERR_DENIED, ERR_LIMITED
@@ -205,6 +205,7 @@ def create(request, data):
         folder = get_owned_folder(request, data)
     form = Form(title=title, body=body, folder=folder)
     save_or_400(form)
+    save_log(request, 'create_form', title)
     return rest_ok()
 
 
@@ -278,6 +279,7 @@ def save_resp(request, data):
 
     resp = Response(form=form, body=resp_body, user=get_user(request), ip=ip)
     resp.save()
+    save_log(request, desc=form.title)
     return rest_ok()
 
 
@@ -315,6 +317,7 @@ def remake(request, data):
     form.title = title
     save_or_400(form)
     form.response_set.all().delete()
+    save_log(request, 'remake_form', title)
     return rest_ok()
 
 
@@ -323,6 +326,7 @@ def remake(request, data):
 def remove(request, data):
     form = get_owned_form(request, data)
     form.delete()
+    save_log(request, 'remove_form', form.title)
     return rest_ok()
 
 
