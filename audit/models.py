@@ -14,7 +14,7 @@ class Ip(models.Model):
 
     @staticmethod
     def of(request) -> 'Ip':
-        return Ip.objects.get_or_create(addr=get_client_ip(request))
+        return Ip.objects.get_or_create(addr=get_client_ip(request))[0]
 
 
 class IpSession(models.Model):
