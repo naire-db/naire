@@ -9,6 +9,7 @@ from common.log import logger
 from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
 from common.types import ensure_str
 
+from audit.actions import save_log
 from form.models import Folder
 from .models import User
 
@@ -38,14 +39,17 @@ def login(request, data):
         except User.DoesNotExist:
             return rest_fail()
         if not user.check_password(password):
+            save_log(request, 'login_failed', user=user)
             return rest_fail()
     else:
         username = username_or_email  # is username
         user = auth.authenticate(request, username=username, password=password)
+        save_log(request, 'login_failed', user=user)
         if user is None:
             return rest_fail()
     auth.login(request, user)
     logger.info(f'Logged: {user}')
+    save_log(request, user=user)
     return rest_data(user.info())
 
 
@@ -81,6 +85,7 @@ def register(request, data):
     folder.owner_user = user
     folder.save()
     logger.info(f'Registered: {user}')
+    save_log(request, user=user)
     return rest_data(user.info())
 
 
@@ -96,6 +101,7 @@ def save_profile(request, data):
         user.email = email
     user.dname = dname
     user.save()
+    save_log(request)
     return rest_data(user.info())
 
 
@@ -108,5 +114,7 @@ def change_password(request, data):
     if user.check_password(password):
         user.set_password(new_password)
         user.save()
+        save_log(request)
         return rest_ok()
+    save_log(request, 'change_password_failed')
     return rest_fail()
