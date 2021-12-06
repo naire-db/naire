@@ -8,7 +8,7 @@ from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_safe
 
 from common.deco import check_logged_in
-from common.errors import ERR_EXPIRED, ERR_AUTH_REQUIRED, ERR_DENIED, ERR_LIMITED
+from common.errors import *
 from common.models import save_or_400, get_user
 from common.rest import rest_data, acquire_json, rest_ok, rest_fail, rest
 from common.types import ensure_str, ensure_dict, ensure_int, ensure_bool, ensure_datetime
@@ -248,6 +248,11 @@ def get_detail(request, data):
     ip = get_ip(request)
     if code := ensure_form_fillable(request, form, ip):
         return rest(code=code)
+
+    if form.passphrase is not None:
+        passphrase = data.get('pass')
+        if passphrase != form.passphrase:
+            return rest(code=ERR_BAD_PASSPHRASE)
 
     return rest_data(form.detail())
 
