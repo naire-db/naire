@@ -19,7 +19,7 @@ def get_ip(request: HttpRequest) -> Ip:
 def save_log(request: HttpRequest,
              action: Optional[str] = None,
              desc: str = '',
-             user: User = None,
+             user: Optional[User] = None,
              ) -> Log:
     if action is None:
         action = inspect.stack()[1].function
