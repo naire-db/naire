@@ -61,3 +61,11 @@ def remove(request, data):
 @require_safe
 def get_all(request):
     return rest_data([t.info() for t in Template.objects.all()])
+
+
+@check_logged_in
+@acquire_json
+def get_detail(request, data):
+    tid = ensure_int(data['tid'])
+    tmpl = get_object_or_404(Template, id=tid)
+    return rest_data(tmpl.detail())

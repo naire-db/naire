@@ -20,3 +20,10 @@ class User(AbstractUser):
             'username': self.username,
             'dname': self.dname
         }
+
+    def id_description(self) -> dict[str]:
+        return {
+            'id': self.id,
+            'username': self.username,
+            'dname': self.dname
+        }

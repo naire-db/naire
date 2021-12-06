@@ -13,8 +13,9 @@ class Template(models.Model):
         return {
             'id': self.id,
             'title': self.title,
-            'user': self.user.description(),
+            'user': self.user.id_description(),
             'use_count': self.use_count,
+            'mtime': self.mtime.timestamp(),
         }
 
     def owner_info(self) -> dict[str]:
@@ -22,4 +23,10 @@ class Template(models.Model):
             'id': self.id,
             'title': self.title,
             'use_count': self.use_count,
+        }
+
+    def detail(self) -> dict[str]:
+        return {
+            'title': self.title,
+            'body': self.body,
         }
