@@ -39,7 +39,7 @@ class Form(models.Model):
     published = models.BooleanField(default=True)
     publish_time = models.DateTimeField(null=True, blank=True)
     unpublish_time = models.DateTimeField(null=True, blank=True)
-    passphrase = models.CharField(max_length=100, null=True, blank=True)
+    passphrase = models.CharField(max_length=100, null=True, blank=True)  # TODO
     login_required = models.BooleanField(default=False)  # read as True when member_required presents
     member_required = models.BooleanField(default=False)
 
