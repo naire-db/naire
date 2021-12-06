@@ -17,6 +17,7 @@ from common.types import ensure_str, ensure_dict, ensure_int, ensure_bool, ensur
 
 from user.models import User
 from org.models import Membership, Org
+from .actions import ensure_owned_folder, ensure_owned_form, get_owned_form
 from .models import Form, Response, Folder
 
 
@@ -84,32 +85,11 @@ def get_folder_overview(request, data):
     return rest_data(res)
 
 
-def ensure_owned_folder(user: User, folder: Folder):
-    if user != folder.owner_user:
-        try:
-            m = folder.owner_org.membership_set.get(user=user)
-        except Membership.DoesNotExist:
-            raise PermissionDenied
-        if m.role < Membership.Role.ADMIN:
-            raise PermissionDenied
-
-
-def ensure_owned_form(user: User, form: Form):
-    ensure_owned_folder(user, form.folder)
-
-
 def get_owned_folder(request, data) -> Folder:
     folder_id = ensure_int(data['folder_id'])
     folder = get_object_or_404(Folder, id=folder_id)
     ensure_owned_folder(request.user, folder)
     return folder
-
-
-def get_owned_form(request, data) -> Form:
-    form_id = ensure_int(data['fid'])
-    form = get_object_or_404(Form, id=form_id)
-    ensure_owned_form(request.user, form)
-    return form
 
 
 def get_owned_resp_form(request, data):
