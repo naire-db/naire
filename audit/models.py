@@ -48,12 +48,12 @@ class Log(models.Model):
     ua = models.CharField(max_length=100, default='')
 
     def detail(self) -> dict[str]:
-        action = action_texts.get(self.action, self.action)
-        if self.description:
-            action += ' (' + self.description + ')'
-        return {
+        res = {
             'ip': self.session.ip.addr,
             'time': self.time.timestamp(),
             'ua': self.ua,
-            'action': action,
+            'action': action_texts.get(self.action, self.action),
         }
+        if self.description:
+            res['object'] = self.description
+        return res
