@@ -384,7 +384,7 @@ def save_form_settings(request, data):
     if not title:
         raise BadRequest
     modified = form.title != title
-    if not modified:
+    if modified:
         form.title = title
     form.published = ensure_bool(data['published'])
     lt = data['publish_time']
