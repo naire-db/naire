@@ -1,7 +1,7 @@
 import datetime
 
 from django.core.exceptions import PermissionDenied, BadRequest
-from django.db.models import Q
+from django.db.models import Q, F
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
@@ -14,6 +14,7 @@ from common.errors import ERR_EXPIRED, ERR_AUTH_REQUIRED, ERR_DENIED, ERR_LIMITE
 from common.models import save_or_400, get_user
 from common.rest import rest_data, acquire_json, rest_ok, rest_fail, rest
 from common.types import ensure_str, ensure_dict, ensure_int, ensure_bool, ensure_datetime
+from template.models import Template
 
 from user.models import User
 from org.models import Membership, Org
@@ -268,8 +269,10 @@ def save_resp(request, data):
 def save_title(request, data):
     form = get_owned_form(request, data)
     title = ensure_str(data['title'])
-    form.title = title
-    save_or_400(form)
+    if form.title != title:
+        form.title = title
+        form.mtime = now()
+        save_or_400(form)
     return rest_ok()
 
 
@@ -370,7 +373,9 @@ def save_form_settings(request, data):
     title = data['title']
     if not title:
         raise BadRequest
-    form.title = title
+    modified = form.title != title
+    if not modified:
+        form.title = title
     form.published = ensure_bool(data['published'])
     lt = data['publish_time']
     if form.published or lt is None:
@@ -391,5 +396,7 @@ def save_form_settings(request, data):
     form.user_limit_reset_time = ensure_str(data['user_limit_reset_time'])
     form.ip_limit_reset_time = ensure_str(data['ip_limit_reset_time'])
     form.update_published()
+    if modified:
+        form.mtime = now()
     save_or_400(form)
     return rest_ok()
