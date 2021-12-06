@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied, BadRequest
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_safe
 
 from audit.actions import get_ip, save_log
@@ -183,7 +183,7 @@ def create(request, data):
         folder = request.user.root_folder
     else:
         folder = get_owned_folder(request, data)
-    form = Form(title=title, body=body, folder=folder)
+    form = Form(title=title, body=body, folder=folder, mtime=now())
     save_or_400(form)
     save_log(request, 'create_form', title)
     return rest_ok()
@@ -295,6 +295,7 @@ def remake(request, data):
     body = ensure_dict(data['body'])
     form.body = body
     form.title = title
+    form.mtime = now()
     save_or_400(form)
     form.response_set.all().delete()
     save_log(request, 'remake_form', title)

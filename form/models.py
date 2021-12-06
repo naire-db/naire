@@ -7,6 +7,7 @@ from django.utils.timezone import now
 
 from audit.models import Ip
 from org.models import Org
+from template.models import Template
 
 
 class Folder(models.Model):
@@ -53,6 +54,9 @@ class Form(models.Model):
     ip_limit = models.IntegerField(choices=Limit.choices, default=Limit.UNLIMITED)
     ip_limit_reset_time = models.TimeField(default=time(0, 0, 0))
 
+    tmpl = models.ForeignKey(Template, on_delete=models.SET_NULL, blank=True, null=True)
+    mtime = models.DateTimeField()
+
     def info(self) -> dict[str]:
         if self.update_published():
             self.save()
@@ -95,6 +99,14 @@ class Form(models.Model):
             },
             'org_name': None if org is None else org.name,
         }
+
+    def tmpl_status(self) -> dict[str]:
+        res = self.info()
+        if self.tmpl:
+            res['tmpl'] = self.tmpl.owner_info()
+            if self.mtime != self.tmpl.mtime:
+                res['updated'] = self.mtime.timestamp()
+        return res
 
     # Return if published field changes.
     def update_published(self) -> bool:
