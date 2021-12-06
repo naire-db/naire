@@ -184,6 +184,11 @@ def create(request, data):
         folder = request.user.root_folder
     else:
         folder = get_owned_folder(request, data)
+
+    tid = data.get('tid')
+    if tid is not None:
+        Template.objects.filter(id=ensure_int(tid)).update(use_count=F('use_count')+1)
+
     form = Form(title=title, body=body, folder=folder, mtime=now())
     save_or_400(form)
     save_log(request, 'create_form', title)
