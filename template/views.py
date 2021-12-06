@@ -36,6 +36,7 @@ def update(request, data):
     tmpl = form.tmpl
     if tmpl is None:
         raise Http404
+    tmpl.title = form.title
     tmpl.body = form.body
     tmpl.mtime = form.mtime
     tmpl.save()
