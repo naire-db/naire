@@ -23,4 +23,5 @@ urlpatterns = [
     path('org/', include('org.urls')),
     path('file/', include('attachment.urls')),
     path('audit/', include('audit.urls')),
+    path('tmpl/', include('template.urls'))
 ]

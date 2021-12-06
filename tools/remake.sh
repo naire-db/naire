@@ -2,7 +2,7 @@
 set -e
 cd "$(dirname "$0")/.."
 
-APPS="user form org attachment audit"
+APPS="user form org attachment audit template"
 
 remake() {
     sudo mysql < tools/remake.sql
