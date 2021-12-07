@@ -1,14 +1,14 @@
-import secrets
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from common.utils import generate_token_16
 from naire import settings
+
 from user.models import User
 
 
-def generate_invite_token():
-    return secrets.token_urlsafe(16)
+# For compatibility with old migrations
+generate_invite_token = generate_token_16
 
 
 class Org(models.Model):
@@ -16,7 +16,7 @@ class Org(models.Model):
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Membership', related_name='members_of_org')
     root_folder = models.OneToOneField('form.Folder', on_delete=models.CASCADE)
     ctime = models.DateTimeField(auto_now_add=True)
-    invite_token = models.SlugField(max_length=32, unique=True, default=generate_invite_token)
+    invite_token = models.SlugField(max_length=32, unique=True, default=generate_token_16)
 
     def common_info(self):
         return {

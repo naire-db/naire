@@ -7,9 +7,10 @@ from common.models import save_or_400
 from common.rest import acquire_json, rest_data, rest_ok, rest_fail
 from common.types import ensure_str, ensure_int
 
+from common.utils import generate_token_16
 from audit.actions import save_log
 from form.models import Folder
-from .models import Org, Membership, generate_invite_token
+from .models import Org, Membership
 
 
 @require_safe
@@ -119,7 +120,7 @@ def rename(request, data):
 @acquire_json
 def refresh_invite_token(request, data):
     org, _ = get_owned_org_membership(request, data)
-    res = org.invite_token = generate_invite_token()
+    res = org.invite_token = generate_token_16()
     org.save()
     return rest_data(res)
 
