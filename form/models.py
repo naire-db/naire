@@ -102,6 +102,7 @@ class Form(models.Model):
 
     def tmpl_status(self) -> dict[str]:
         res = self.info()
+        res['body'] = self.body
         if self.tmpl:
             res['tmpl'] = self.tmpl.owner_info()
             if self.mtime != self.tmpl.mtime:
