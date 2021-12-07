@@ -329,7 +329,7 @@ def remove(request, data):
 def get_form_resps(request, data):
     form = get_owned_form(request, data)
     return rest_data({
-        'form': form.detail(),
+        'form': form.full_detail(),
         'resps': [r.info() for r in form.response_set.all()]
     })
 
@@ -339,7 +339,7 @@ def get_form_resps(request, data):
 def get_form_stats(request, data):
     form = get_owned_form(request, data)
     return rest_data({
-        'form': form.detail(),
+        'form': form.full_detail(),
         'resps': [r.detail() for r in form.response_set.all()]
     })
 

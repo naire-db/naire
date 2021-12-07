@@ -58,20 +58,25 @@ class Form(models.Model):
     mtime = models.DateTimeField()
 
     def info(self) -> dict[str]:
-        if self.update_published():
-            self.save()
         return {
             'id': self.id,
             'title': self.title,
             'ctime': self.ctime.timestamp(),
             'resp_count': self.response_set.count(),
-            'published': self.published
+            'published': self.get_published()
         }
 
     def detail(self) -> dict[str]:
         return {
             'title': self.title,
             'body': self.body
+        }
+
+    def full_detail(self) -> dict[str]:
+        return {
+            'title': self.title,
+            'body': self.body,
+            'published': self.get_published(),
         }
 
     def make_cloned(self, folder: Folder, title: str):
@@ -122,6 +127,11 @@ class Form(models.Model):
             self.published = True
             return True
         return False
+
+    def get_published(self) -> bool:
+        if self.update_published():
+            self.save()
+        return self.published
 
 
 class Response(models.Model):
