@@ -2,6 +2,7 @@ import os.path
 
 from django.db import models
 
+from common.utils import generate_token_16
 from form.models import Response, Form
 
 
@@ -14,8 +15,9 @@ def trim_filename(s: str) -> str:
 
 class Attachment(models.Model):
     file = models.FileField(upload_to='attachments/')
-    name = models.CharField(max_length=200)
+    filename = models.CharField(max_length=200)
     resp = models.ForeignKey(Response, on_delete=models.CASCADE, blank=True, null=True)
+    token = models.SlugField(max_length=32, unique=True, default=generate_token_16)
 
     def set_filename(self, s):
         self.filename = trim_filename(s)

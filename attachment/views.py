@@ -31,15 +31,15 @@ def upload_file(request):
     attachment: Attachment = save_form_or_400(form)
     attachment.set_filename(file.name)
     attachment.save()
-    return rest_data(attachment.id)
+    return rest_data(attachment.token)
     # TODO: add resp id
 
 
 @require_safe
 @check_logged_in
-def get_file(request, attachment_id):
+def get_file(request, token):
     # TODO: check response's authority
-    attachment = get_object_or_404(Attachment, id=attachment_id)
+    attachment = get_object_or_404(Attachment, token=token)
     return FileResponse(attachment.file, filename=attachment.filename)
 
 
