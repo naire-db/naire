@@ -20,7 +20,6 @@ def save_log(request: HttpRequest,
              action: Optional[str] = None,
              desc: str = '',
              user: Optional[User] = None,
-             /,
              object_id: Optional[int] = None,
              ) -> Log:
     if action is None:
