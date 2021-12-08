@@ -46,6 +46,7 @@ class Log(models.Model):
     action = models.CharField(max_length=100)
     description = models.CharField(max_length=250, default='')
     ua = models.CharField(max_length=100, default='')
+    object_id = models.BigIntegerField(blank=True, null=True)
 
     def detail(self) -> dict[str]:
         res = {

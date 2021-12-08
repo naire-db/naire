@@ -20,6 +20,8 @@ def save_log(request: HttpRequest,
              action: Optional[str] = None,
              desc: str = '',
              user: Optional[User] = None,
+             /,
+             object_id: Optional[int] = None,
              ) -> Log:
     if action is None:
         action = inspect.stack()[1].function
@@ -32,4 +34,5 @@ def save_log(request: HttpRequest,
     return Log.objects.create(session=session,
                               ua=ua,
                               action=action,
-                              description=desc)
+                              description=desc,
+                              object_id=object_id)
