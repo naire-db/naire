@@ -270,7 +270,8 @@ def save_resp(request, data):
 
     resp = Response(form=form, body=resp_body, user=get_user(request), ip=ip)
     resp.save()
-    save_log(request, desc=form.title)
+    if request.user.is_authenticated:
+        save_log(request, desc=form.title)
     return rest_ok()
 
 
