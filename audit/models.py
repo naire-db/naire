@@ -22,6 +22,7 @@ class IpSession(models.Model):
     ip = models.ForeignKey(Ip, on_delete=models.CASCADE)
 
 
+# TODO: change email
 action_texts = {
     'login': '登录',
     'login_failed': '登录失败',
