@@ -1,5 +1,6 @@
 from django.contrib import auth
 from django.core.exceptions import BadRequest
+from django.db.models import Q
 from django.http import HttpResponse
 from django.views.decorators.http import require_safe
 
@@ -10,7 +11,9 @@ from common.rest import rest_ok, rest_fail, acquire_json, rest_data, rest
 from common.types import ensure_str
 
 from audit.actions import save_log
-from form.models import Folder
+from audit.models import Log
+from form.models import Folder, Response
+from org.models import Org, Membership
 from .models import User
 
 
@@ -124,3 +127,47 @@ def change_password(request, data):
         return rest_ok()
     save_log(request, 'change_password_failed')
     return rest_fail()
+
+
+MAX_FEED_COUNT = 10
+
+
+@require_safe
+@check_logged_in
+def get_feeds(request):
+    user: User = request.user
+    orgs = Org.objects.filter(membership__user=user, membership__role__gte=Membership.Role.ADMIN)
+    all_orgs = Org.objects.filter(membership__user=user)
+
+    # TODO: 问卷发布？
+
+    res = []
+    for resp in Response.objects.filter(
+        Q(form__folder__owner_user=user) |
+        Q(form__folder__owner_org__in=orgs)
+    ).order_by('-id')[:MAX_FEED_COUNT]:
+        res.append((
+            'resp',
+            resp.ctime.timestamp(),
+            resp.user.description() if resp.user else None,
+            resp.form.description(),
+        ))
+
+    for log in Log.objects.filter(
+        action__in=['join_org', 'leave_org'], object_id__in=all_orgs
+    ).order_by('-id')[:MAX_FEED_COUNT]:
+        org = Org.objects.get(id=log.object_id)
+        res.append((
+            log.action,
+            log.time.timestamp(),
+            log.session.user.description(),
+            org.basic_info(),
+        ))
+
+    res.sort(key=lambda t: -t[1])
+    return rest_data([{
+        'type': t[0],
+        'time': t[1],
+        'user': t[2],
+        'object': t[3],
+    } for t in res[:MAX_FEED_COUNT]])

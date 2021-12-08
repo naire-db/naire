@@ -133,6 +133,12 @@ class Form(models.Model):
             self.save()
         return self.published
 
+    def description(self) -> dict[str]:
+        return {
+            'id': self.id,
+            'title': self.title,
+        }
+
 
 class Response(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE)
