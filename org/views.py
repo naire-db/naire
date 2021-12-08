@@ -67,7 +67,7 @@ def get_members(request, data):
 def leave(request, data):
     org, m = get_joined_org_membership(request, data)
     m.delete()
-    save_log(request, 'leave_org', org.name)
+    save_log(request, 'leave_org', org.name, object_id=org.id)
     return rest_ok()
 
 
@@ -96,7 +96,7 @@ def accept_invite(request, data):
     if org.invite_token != token:
         return rest_fail()
     org.members.add(request.user)
-    save_log(request, 'join_org', org.name)
+    save_log(request, 'join_org', org.name, object_id=org.id)
     return rest_ok()
 
 
