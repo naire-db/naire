@@ -53,7 +53,6 @@ def upload_image(request):
     image.set_filename(file.name)
     image.save()
     return rest_data(image.id)
-    # TODO: add form_id after form submit
 
 
 @require_safe
@@ -61,3 +60,9 @@ def get_image(request, image_id):
     # TODO: check response's authority
     image = get_object_or_404(Image, id=image_id)
     return FileResponse(image.file, filename=image.filename)
+
+
+@require_safe
+@check_logged_in
+def get_all_images(request):
+    images = Image.objects.get()

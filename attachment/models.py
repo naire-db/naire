@@ -26,7 +26,6 @@ class Attachment(models.Model):
 class Image(models.Model):
     file = models.FileField(upload_to='images/')
     filename = models.CharField(max_length=200)
-    form = models.ForeignKey(Form, on_delete=models.CASCADE, blank=True, null=True)
 
     def set_filename(self, s):
         self.filename = trim_filename(s)
