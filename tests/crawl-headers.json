@@ -1,0 +1,12 @@
+{
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "Accept-Language": "zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6,ja-JP;q=0.5,ja;q=0.4",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
+    "DNT": "1",
+    "Connection": "keep-alive",
+    "Cookie": "_uab_collina=163195413722127329536738; WjxUser=UserName=kyr1no; .ASPXANONYMOUS=mY0VXzgW2AEkAAAANjJmNjY1NDctNDBjMC00OWU3LWI3ZTktYTMyMzIwOWYwZTkwuxANqmb3GXE3pKyPg8Yvi3mx-PQ1; crudat=2018-02-11 17:35:57; SojumpSurvey=010214FACBD016BCD908FE149ADD5738BCD90801066B007900720031006E006F0000012F00FF0CE6A654326DF736FF5BA03CAC10928014364540; LastCheckUpdateDate=1; acw_tc=76b20f7016391678563133478e44955af53d773746bfab18e15cebbbd02b18; SERVERID=3f9180de4977a2b2031e23b89d53baa6|1639168016|1639166009; ssxmod_itna=YqIxyDnD2jDQYAKGHdE47qxmq9AoDBGAhYOjOx0vReGzDAxn40iDtoPwD9Y=nQDExYqE4b0+KsLe97PhK3bODRGWs3KR+eDQxY=DUxAtDBxDm2GUDBLdpDoxiicDCnFDPaKD3cD7PGmDGYVGLjODB=DmqDBbeG0DGUUQldD7Ej/4C0RIqGRD0Aex7QtdqDEDG3D0fQsQAxDzxDAI2NtsPGEUcUxjeGvWmuXfLQeD0PY3UhdVTi45xOeiDGWbOtq=eGuDG=bZMLidFNQkU0eOerYpldEMxhWKAezBx4vWDeb8GG9jD4=Q0GdDPrYxYiP1ChDzx6ADoYX7EDAixdQDxD==; ssxmod_itna2=YqIxyDnD2jDQYAKGHdE47qxmq9AoDBGAhYOjxnKf4e4DsqwDLlOYsOnjEg4nRGjzYUYT2Dse4fiFQH=48DR6HNsbaEjLZFf0GTj11r3Y5OinnDORs87zBdH=il6loAX9hHQ1cZSs6arRCHsllnbz1BGBanPShxw=c5hxrD4nBBTZimh4I7ibEDs4IEGW9TbWUnEDES+x/WvYfy10U7tOxbriQDNk=wiw6Doe0B1ccA2UGQpg6WG5dTzDpypLS+UHLkLdy9py=GadtDibxtisqqrexUWEwfUkOmOKcjQPVwnIgqiHkLZc+dyMYZxbxS8T8OSLoQuPoO8=A=kf=1rxPLNPubG3dtC=Iuh8Swqi3A8CDEmGTTCdC7g7Lg8QisUjpU0Kgr3awIvehRldiwribTdrbdei4jFDhkgusoZa=PEQga5psI+taarGDPD7QPnPeBPr1NiGYiimUID0UmiiFE7D5PFq7D1=eO7DrEhRUQeoyjjtqDGcDG7lhx8GGuo+Erxs7Oei2PLLvo4tODGB+Q0630oYAxiD2HAjQB44D===",
+    "sec-ch-ua": "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"96\", \"Google Chrome\";v=\"96\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Linux\"",
+    "Upgrade-Insecure-Requests": "1"
+}
