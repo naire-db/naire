@@ -32,4 +32,5 @@ urlpatterns = [
     path('copy/', views.copy, name='copy'),
 
     path('get_org_overview/', views.get_org_overview, name='get_org_overview'),
+    path('get_org_folders/', views.get_org_folders, name='get_org_folders'),
 ]

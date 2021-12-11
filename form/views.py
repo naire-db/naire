@@ -73,6 +73,24 @@ def get_org_overview(request, data):
 
 @check_logged_in
 @acquire_json
+def get_org_folders(request, data):
+    oid = ensure_int(data['oid'])
+    if oid < 0:
+        user: User = request.user
+        root_fid = user.root_folder_id
+        folders = Folder.objects.filter(owner_user=user)
+    else:
+        org = get_admin_org(request.user, oid)
+        root_fid = org.root_folder_id
+        folders = Folder.objects.filter(owner_org=org)
+    return rest_data({
+        'root_fid': root_fid,
+        'folders': [f.info() for f in folders],
+    })
+
+
+@check_logged_in
+@acquire_json
 def get_folder_overview(request, data):
     folder = get_owned_folder(request, data)
     user: User = request.user
@@ -157,6 +175,8 @@ def move_to_folder(request, data):
     form = get_owned_form(request, data)
     folder = get_owned_folder(request, data)
     form.folder = folder
+    if not folder.owner_org:
+        form.member_required = False
     form.save()
     return rest_ok()
 
@@ -170,6 +190,8 @@ def copy(request, data):
     form.pk = None
     form._state.adding = True
     form.make_cloned(folder, title)
+    if not folder.owner_org:
+        form.member_required = False
     save_or_400(form)
     return rest_data(form.info())
 
