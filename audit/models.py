@@ -1,11 +1,7 @@
 from django.db import models
+
+from common.utils import get_client_ip
 from user.models import User
-
-
-def get_client_ip(request):
-    if xff := request.META.get('HTTP_X_FORWARDED_FOR'):
-        return xff.split(',')[0]
-    return request.META['REMOTE_ADDR']
 
 
 class Ip(models.Model):
