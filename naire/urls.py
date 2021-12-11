@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+import crawl.views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('user.urls')),
@@ -23,5 +25,6 @@ urlpatterns = [
     path('org/', include('org.urls')),
     path('file/', include('attachment.urls')),
     path('audit/', include('audit.urls')),
-    path('tmpl/', include('template.urls'))
+    path('tmpl/', include('template.urls')),
+    path('crawl/', crawl.views.crawl, name='crawl'),
 ]
