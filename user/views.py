@@ -64,7 +64,10 @@ def login(request, data):
 
 @require_safe
 def logout(request):
+    token = request.session.get('naire_auth_token')
     auth.logout(request)
+    if token:
+        request.session['naire_auth_token'] = token
     return rest_ok()
 
 
