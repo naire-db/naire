@@ -26,7 +26,14 @@ SECRET_KEY = 'django-insecure-uog_&rk_e!g&bu@hnvf)@2+ld1kq#-8=oe0le2y8_^(mt-zb+8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = environ.get('NAIRE_PROD') != '1'
 
-ALLOWED_HOSTS = []
+is_secret = environ.get('NAIRE_SECRET') == '1'
+
+if DEBUG:
+    ALLOWED_HOSTS = []
+elif is_secret:
+    ALLOWED_HOSTS = ['k.latency.ga']
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -48,6 +55,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.gzip.GZipMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -56,8 +64,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.gzip.GZipMiddleware'
 ]
+
+if is_secret:
+    MIDDLEWARE.append('common.secret.secret_middleware')
 
 ROOT_URLCONF = 'naire.urls'
 
@@ -84,24 +94,19 @@ WSGI_APPLICATION = 'naire.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'naire',
-            'USER': 'naire',
-            'PASSWORD': 'naire'
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'naire',
+        'USER': 'naire',
+        'PASSWORD': 'naire',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'naire',
-            'USER': 'naire',
-            'PASSWORD': environ['NAIRE_MYSQL_PASSWORD']
-        }
-    }
+}
+
+if not DEBUG:
+    if pw := environ.get('NAIRE_MYSQL_PASSWORD'):
+        DATABASES['default']['PASSWORD'] = pw
+
 
 
 # Password validation
