@@ -9,14 +9,21 @@ from common.types import ensure_str, ensure_int
 
 from common.utils import generate_token_16
 from audit.actions import save_log
-from form.models import Folder
+from form.models import Folder, Form
 from .models import Org, Membership
+
+
+def joined_info(m: Membership):
+    res = m.org_info()
+    if m.role >= Membership.Role.ADMIN:
+        res['form_count'] = Form.objects.filter(folder__owner_org=m.org).count()
+    return res
 
 
 @require_safe
 @check_logged_in
 def get_joined(request):
-    return rest_data([m.org_info() for m in request.user.membership_set.all()])
+    return rest_data([joined_info(m) for m in request.user.membership_set.all()])
 
 
 @check_logged_in
