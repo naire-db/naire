@@ -31,7 +31,7 @@ is_secret = environ.get('NAIRE_SECRET') == '1'
 if DEBUG:
     ALLOWED_HOSTS = []
 elif is_secret:
-    ALLOWED_HOSTS = ['k.latency.ga']
+    ALLOWED_HOSTS = ['k.latency.ga', 'i.latency.ga']
 else:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -162,6 +162,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'https://i.latency.ga',
+    'https://k.latency.ga',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
