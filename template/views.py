@@ -76,8 +76,8 @@ def get_detail(request, data):
 @acquire_json
 def rename(request, data):
     tid = ensure_int(data['tid'])
-    tmpl = get_object_or_404(Template, id=tid)
     title = ensure_str(data['title'])
+    tmpl = get_object_or_404(Template, id=tid)
     tmpl.title = title
     save_or_400(tmpl)
     return rest_ok()
