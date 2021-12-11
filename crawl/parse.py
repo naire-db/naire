@@ -34,6 +34,12 @@ def get_labels_tmpl(q: element) -> list[str]:
     ]
 
 
+def trim(s: str) -> str:
+    if len(s) > 200:
+        return s[:196] + ' ...'
+    return s
+
+
 class FormBuilder:
     def __init__(self, title: str):
         self.next_oid = 0
@@ -55,13 +61,13 @@ class FormBuilder:
         r = {
             'type': ty,
             'id': len(self.questions),
-            'title': title,
+            'title': trim(title),
         }
         self.questions.append(r | kw)
 
     def build(self) -> dict[str]:
         return {
-            'title': self.title,
+            'title': trim(self.title),
             'body': {
                 'questions': self.questions
             }
