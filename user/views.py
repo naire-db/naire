@@ -128,9 +128,12 @@ def change_password(request, data):
     new_password = ensure_str(data['new_password'])
     user = request.user
     if user.check_password(password):
+        token = request.session.get('naire_auth_token')
         user.set_password(new_password)
         user.save()
         save_log(request)
+        if token:
+            request.session['naire_auth_token'] = token
         return rest_ok()
     save_log(request, 'change_password_failed')
     return rest_fail()
