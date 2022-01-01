@@ -56,7 +56,11 @@ def login(request, data):
             else:
                 save_log(request, 'login_failed', user=user)
             return rest_fail()
+
+    token = request.session.get('naire_auth_token')
     auth.login(request, user)
+    if token:
+        request.session['naire_auth_token'] = token
     logger.info(f'Logged: {user}')
     save_log(request, user=user)
     return rest_data(user.info())
